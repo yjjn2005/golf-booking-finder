@@ -266,6 +266,62 @@
             border-radius: 3px;
             background: linear-gradient(90deg, #1db87a, #c9a84c);
         }
+
+        /* Tab buttons */
+        .tab-btn-active {
+            background: rgba(201,168,76,0.15);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+        }
+        .tab-btn-inactive {
+            background: transparent;
+            border: 1px solid var(--dark-border);
+            color: #7a8fa0;
+        }
+        .tab-btn-inactive:hover { border-color: #4a6070; color: #a0b4c0; }
+
+        /* Platform link card */
+        .platform-link-card {
+            background: #0f1923;
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: border-color 0.2s, transform 0.15s;
+            text-decoration: none;
+        }
+        .platform-link-card:hover {
+            border-color: rgba(201,168,76,0.5);
+            transform: translateY(-2px);
+        }
+        .platform-link-card .plat-name { font-size: 13px; font-weight: 700; }
+        .platform-link-card .plat-url  { font-size: 10px; color: #4a6070; }
+        .platform-link-card .plat-btn  {
+            margin-top: 4px;
+            padding: 6px 0;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #c0d0e0;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .platform-link-card:hover .plat-btn { background: rgba(201,168,76,0.1); }
+
+        /* Info stat box */
+        .info-stat {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--dark-border);
+            border-radius: 10px;
+            padding: 10px 8px;
+        }
+        .info-stat .lbl { font-size: 10px; color: #7a8fa0; margin-bottom: 4px; }
+        .info-stat .val { font-size: 15px; font-weight: 800; }
     </style>
 </head>
 <body>
@@ -308,101 +364,146 @@
 
     <!-- SEARCH PANEL -->
     <section class="search-panel p-6">
-        <div class="flex items-center gap-2 mb-5">
-            <svg class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <h2 class="font-bold text-base text-white">조인·부킹 최저가 탐색</h2>
-            <span class="text-xs px-2 py-0.5 rounded-full ml-auto" style="background:rgba(29,184,122,0.12);color:#4ade80;border:1px solid rgba(29,184,122,0.2)">6개 플랫폼 동시 조회</span>
-        </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">희망 날짜</label>
-                <input type="date" id="searchDate" class="input-dark w-full px-3 py-2.5 text-sm">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">티오프 시간대</label>
-                <select id="searchTime" class="input-dark w-full px-3 py-2.5 text-sm">
-                    <option value="dawn">새벽 (05:30~07:00)</option>
-                    <option value="morning" selected>오전 (07:00~09:30)</option>
-                    <option value="midday">낮 (09:30~12:00)</option>
-                    <option value="afternoon">오후 (12:00~15:00)</option>
-                    <option value="night">야간 (17:00 이후)</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">조인 구성</label>
-                <select id="joinType" class="input-dark w-full px-3 py-2.5 text-sm">
-                    <option value="all">전체 (조인+4인부킹)</option>
-                    <option value="join1">1인 조인</option>
-                    <option value="join2">2인 조인</option>
-                    <option value="join3">3인 조인</option>
-                    <option value="book4">4인 단독 부킹 ★</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">최대 거리 (송파 기점)</label>
-                <select id="maxEta" class="input-dark w-full px-3 py-2.5 text-sm">
-                    <option value="60">1시간 이내</option>
-                    <option value="90" selected>1시간 30분 이내 (추천)</option>
-                    <option value="120">2시간 이내</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Advanced filters -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">최대 총비용 (1인)</label>
-                <select id="maxBudget" class="input-dark w-full px-3 py-2.5 text-sm">
-                    <option value="9999999">제한 없음</option>
-                    <option value="200000">20만원 이하</option>
-                    <option value="250000">25만원 이하</option>
-                    <option value="300000">30만원 이하</option>
-                    <option value="350000">35만원 이하</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">지역 필터</label>
-                <select id="regionFilter" class="input-dark w-full px-3 py-2.5 text-sm">
-                    <option value="all">전체 지역</option>
-                    <option value="용인">경기 용인</option>
-                    <option value="포천">경기 포천</option>
-                    <option value="여주">경기 여주</option>
-                    <option value="이천">경기 이천</option>
-                    <option value="안성">경기 안성</option>
-                    <option value="충주">충북 충주</option>
-                    <option value="춘천">강원 춘천</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">정렬 기준</label>
-                <select id="sortBy" class="input-dark w-full px-3 py-2.5 text-sm">
-                    <option value="price">총비용 낮은 순</option>
-                    <option value="eta">거리 가까운 순</option>
-                    <option value="time">티오프 빠른 순</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1.5">캐디 여부</label>
-                <select id="caddieType" class="input-dark w-full px-3 py-2.5 text-sm">
-                    <option value="all">캐디·노캐디 전체</option>
-                    <option value="caddie">캐디 동반</option>
-                    <option value="no">노캐디 (카트만)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="flex items-center justify-between">
-            <p class="text-xs text-gray-500">※ 그린피 기준 최저가 정렬</p>
-            <button onclick="performSearch()" class="btn-primary px-7 py-3 text-sm flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                최저가 탐색 시작
+        <!-- 탭 전환 -->
+        <div class="flex gap-2 mb-5">
+            <button id="tabAuto" onclick="switchTab('auto')" class="tab-btn-active flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                자동 탐색
             </button>
+            <button id="tabManual" onclick="switchTab('manual')" class="tab-btn-inactive flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                골프장 직접 검색
+            </button>
+            <span class="text-xs px-2 py-1 rounded-full ml-auto self-center" style="background:rgba(29,184,122,0.12);color:#4ade80;border:1px solid rgba(29,184,122,0.2)">6개 플랫폼 동시 조회</span>
         </div>
+
+        <!-- 자동 탐색 탭 -->
+        <div id="panelAuto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">희망 날짜</label>
+                    <input type="date" id="searchDate" class="input-dark w-full px-3 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">티오프 시간대</label>
+                    <select id="searchTime" class="input-dark w-full px-3 py-2.5 text-sm">
+                        <option value="dawn">새벽 (05:30~07:00)</option>
+                        <option value="morning" selected>오전 (07:00~09:30)</option>
+                        <option value="midday">낮 (09:30~12:00)</option>
+                        <option value="afternoon">오후 (12:00~15:00)</option>
+                        <option value="night">야간 (17:00 이후)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">조인 구성</label>
+                    <select id="joinType" class="input-dark w-full px-3 py-2.5 text-sm">
+                        <option value="all">전체 (조인+4인부킹)</option>
+                        <option value="join1">1인 조인</option>
+                        <option value="join2">2인 조인</option>
+                        <option value="join3">3인 조인</option>
+                        <option value="book4">4인 단독 부킹 ★</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">최대 거리 (송파 기점)</label>
+                    <select id="maxEta" class="input-dark w-full px-3 py-2.5 text-sm">
+                        <option value="60">1시간 이내</option>
+                        <option value="90" selected>1시간 30분 이내 (추천)</option>
+                        <option value="120">2시간 이내</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">최대 그린피 (1인)</label>
+                    <select id="maxBudget" class="input-dark w-full px-3 py-2.5 text-sm">
+                        <option value="9999999">제한 없음</option>
+                        <option value="150000">15만원 이하</option>
+                        <option value="200000">20만원 이하</option>
+                        <option value="250000">25만원 이하</option>
+                        <option value="300000">30만원 이하</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">지역 필터</label>
+                    <select id="regionFilter" class="input-dark w-full px-3 py-2.5 text-sm">
+                        <option value="all">전체 지역</option>
+                        <option value="용인">경기 용인</option>
+                        <option value="포천">경기 포천</option>
+                        <option value="여주">경기 여주</option>
+                        <option value="이천">경기 이천</option>
+                        <option value="안성">경기 안성</option>
+                        <option value="충주">충북 충주</option>
+                        <option value="춘천">강원 춘천</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">정렬 기준</label>
+                    <select id="sortBy" class="input-dark w-full px-3 py-2.5 text-sm">
+                        <option value="price">그린피 낮은 순</option>
+                        <option value="eta">거리 가까운 순</option>
+                        <option value="time">티오프 빠른 순</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">캐디 여부</label>
+                    <select id="caddieType" class="input-dark w-full px-3 py-2.5 text-sm">
+                        <option value="all">캐디·노캐디 전체</option>
+                        <option value="caddie">캐디 동반</option>
+                        <option value="no">노캐디 (카트만)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <p class="text-xs text-gray-500">※ 그린피 기준 최저가 정렬</p>
+                <button onclick="performSearch()" class="btn-primary px-7 py-3 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    최저가 탐색 시작
+                </button>
+            </div>
+        </div>
+
+        <!-- 직접 검색 탭 -->
+        <div id="panelManual" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">골프장명 직접 입력</label>
+                    <input type="text" id="manualCourse" placeholder="예: 남춘천CC, 사우스스프링스, 베어크리크..."
+                        class="input-dark w-full px-3 py-2.5 text-sm"
+                        oninput="updateManualLinks()"
+                        onkeydown="if(event.key==='Enter') openAllPlatforms()">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1.5">날짜</label>
+                    <input type="date" id="manualDate" class="input-dark w-full px-3 py-2.5 text-sm" onchange="updateManualLinks()">
+                </div>
+            </div>
+
+            <!-- 플랫폼 링크 카드 -->
+            <div id="platformLinks" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                <!-- dynamically rendered -->
+            </div>
+
+            <div class="flex items-center justify-between">
+                <p class="text-xs text-gray-500">※ 버튼 클릭 시 해당 플랫폼에서 실시간 잔여 티타임 확인</p>
+                <button onclick="openAllPlatforms()" class="btn-primary px-6 py-3 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    6개 플랫폼 전체 열기
+                </button>
+            </div>
+
+            <!-- 남춘천CC 정보 패널 (고정 참고 데이터) -->
+            <div id="courseInfoPanel" class="hidden mt-4 rounded-xl p-4" style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2)">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-gold font-bold text-sm" id="infoCourseName"></span>
+                    <span class="text-xs text-gray-500">참고 정보 (실시간 아님)</span>
+                </div>
+                <div id="infoBody" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center"></div>
+                <p class="text-xs text-gray-500 mt-3">※ 실제 가격·잔여 티타임은 위 플랫폼에서 직접 확인하세요</p>
+            </div>
+        </div>
+
     </section>
 
     <!-- LOADING -->
@@ -642,6 +743,105 @@ let activeFilter = 'all';
 let activeSort = 'price';
 
 // ────────────────────────────────────────
+// 플랫폼 검색 URL 생성
+// ────────────────────────────────────────
+const PLATFORM_DEFS = [
+    { name: '골프몬',     badge: 'badge-golfmon',     color: '#60a5fa',
+      url: q => `https://www.golfmon.kr/search?keyword=${encodeURIComponent(q)}` },
+    { name: '골팡',       badge: 'badge-golfpang',    color: '#c084fc',
+      url: q => `https://www.golfpang.com/web/round/booking_list.do?searchWord=${encodeURIComponent(q)}` },
+    { name: '스마트스코어', badge: 'badge-smartscore', color: '#facc15',
+      url: q => `https://www.smartscore.kr/reservation/list?keyword=${encodeURIComponent(q)}` },
+    { name: '카카오골프',  badge: 'badge-kakao',       color: '#fbbf24',
+      url: q => `https://kakao.golf/search?query=${encodeURIComponent(q)}` },
+    { name: '그린잇',     badge: 'badge-greenit',     color: '#4ade80',
+      url: q => `https://www.greenit.cc/search?q=${encodeURIComponent(q)}` },
+    { name: '티스캐너',   badge: 'badge-teescanner',  color: '#f87171',
+      url: q => `https://www.teescanner.com/search?keyword=${encodeURIComponent(q)}` },
+];
+
+// 골프장별 참고 정보 (실측 기준)
+const COURSE_INFO = {
+    '남춘천': { name:'남춘천CC', green:'8~10만원', tee:'06:30~14:00', cart:'2.5만원', caddie:'3.7만원', note:'대중제 36홀 | 빅토리·챌린지 코스' },
+    '남춘천cc': { name:'남춘천CC', green:'8~10만원', tee:'06:30~14:00', cart:'2.5만원', caddie:'3.7만원', note:'대중제 36홀 | 빅토리·챌린지 코스' },
+    '사우스스프링스': { name:'사우스스프링스CC', green:'23~28만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'KLPGA 개최 | 프리미엄 코스' },
+    '평화cc': { name:'평화CC (춘천)', green:'17~22만원', tee:'07:00~13:30', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 대중제' },
+    '플라자cc': { name:'플라자CC 용인', green:'20~26만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인' },
+    '베어크리크': { name:'베어크리크CC', green:'20~28만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'포천 / 춘천 선택' },
+    '몽베르': { name:'몽베르CC', green:'18~24만원', tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천' },
+    '자유cc': { name:'자유CC', green:'18~25만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 여주' },
+};
+
+function getCourseInfo(keyword) {
+    const k = keyword.trim().toLowerCase();
+    for (const key of Object.keys(COURSE_INFO)) {
+        if (k.includes(key)) return COURSE_INFO[key];
+    }
+    return null;
+}
+
+// ────────────────────────────────────────
+// 탭 전환
+// ────────────────────────────────────────
+function switchTab(tab) {
+    const isAuto = tab === 'auto';
+    document.getElementById('panelAuto').classList.toggle('hidden', !isAuto);
+    document.getElementById('panelManual').classList.toggle('hidden', isAuto);
+    document.getElementById('tabAuto').className = isAuto
+        ? 'tab-btn-active flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all'
+        : 'tab-btn-inactive flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all';
+    document.getElementById('tabManual').className = isAuto
+        ? 'tab-btn-inactive flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all'
+        : 'tab-btn-active flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all';
+    if (!isAuto) updateManualLinks();
+}
+
+// ────────────────────────────────────────
+// 직접 검색: 플랫폼 링크 렌더링
+// ────────────────────────────────────────
+function updateManualLinks() {
+    const course = document.getElementById('manualCourse').value.trim();
+    const date   = document.getElementById('manualDate').value;
+    const query  = course + (date ? ' ' + date : '');
+    const container = document.getElementById('platformLinks');
+
+    container.innerHTML = PLATFORM_DEFS.map(p => `
+        <a href="${p.url(course || '골프장')}" target="_blank" rel="noopener" class="platform-link-card">
+            <div class="flex items-center justify-between">
+                <span class="${p.badge} plat-name px-2 py-0.5 rounded-md">${p.name}</span>
+                <svg class="w-3.5 h-3.5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </div>
+            <div class="plat-btn">${course ? `"${course}" 검색` : '클릭하여 검색'}</div>
+        </a>
+    `).join('');
+
+    // 참고 정보 패널
+    const info = course ? getCourseInfo(course) : null;
+    const infoPanel = document.getElementById('courseInfoPanel');
+    if (info) {
+        document.getElementById('infoCourseName').innerText = '⛳ ' + info.name;
+        document.getElementById('infoBody').innerHTML = `
+            <div class="info-stat"><div class="lbl">주말 그린피</div><div class="val text-gold">${info.green}</div></div>
+            <div class="info-stat"><div class="lbl">티오프 시간대</div><div class="val text-white" style="font-size:13px">${info.tee}</div></div>
+            <div class="info-stat"><div class="lbl">카트비 (1인)</div><div class="val text-blue-400">${info.cart}</div></div>
+            <div class="info-stat"><div class="lbl">캐디피 (1인)</div><div class="val text-purple-400">${info.caddie}</div></div>
+            <div class="info-stat md:col-span-4 col-span-2" style="text-align:left"><div class="lbl">코스 정보</div><div class="val text-gray-300" style="font-size:13px">${info.note}</div></div>
+        `;
+        infoPanel.classList.remove('hidden');
+    } else {
+        infoPanel.classList.add('hidden');
+    }
+}
+
+function openAllPlatforms() {
+    const course = document.getElementById('manualCourse').value.trim();
+    if (!course) { alert('골프장명을 입력해주세요.'); return; }
+    PLATFORM_DEFS.forEach((p, i) => {
+        setTimeout(() => window.open(p.url(course), '_blank'), i * 200);
+    });
+}
+
+// ────────────────────────────────────────
 // INIT
 // ────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -651,6 +851,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sat = new Date(today);
     sat.setDate(today.getDate() + diff);
     dateInput.valueAsDate = sat;
+
+    // 직접 검색 날짜도 동기화
+    const manualDate = document.getElementById('manualDate');
+    if (manualDate) manualDate.valueAsDate = sat;
+    updateManualLinks();
 
     // Sort tabs
     document.querySelectorAll('.sort-tab').forEach(btn => {
