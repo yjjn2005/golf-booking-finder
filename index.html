@@ -1,15 +1,1011 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⛳ 골프 최저가 부킹 — 송파 기준 주말 실시간 비교</title>
-  <meta name="description" content="골프몬·골팡·조인부킹 실시간 연동, 송파 기준 주말/공휴일 최저가 골프 부킹 앱" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GolfMeta — 실시간 최저가 조인·부킹</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e8d5a0;
+            --dark: #0f1923;
+            --dark-card: #192231;
+            --dark-border: #2a3a4a;
+            --green: #1db87a;
+            --green-dim: #147a52;
+        }
+        * { font-family: 'Noto Sans KR', sans-serif; }
+        body { background: var(--dark); color: #e8edf2; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--dark-border); border-radius: 3px; }
+
+        /* Gold gradient text */
+        .text-gold { color: var(--gold); }
+        .text-gold-gradient {
+            background: linear-gradient(135deg, #e8d5a0 0%, #c9a84c 50%, #a07830 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Header */
+        .header-bg {
+            background: linear-gradient(180deg, #0a1520 0%, #0f1923 100%);
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        /* Search panel */
+        .search-panel {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 16px;
+        }
+
+        /* Input styles */
+        .input-dark {
+            background: #0f1923;
+            border: 1px solid var(--dark-border);
+            color: #e8edf2;
+            border-radius: 10px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-dark:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(201,168,76,0.15);
+        }
+        .input-dark option { background: #192231; }
+
+        /* Platform badge */
+        .badge-golfmon { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+        .badge-golfpang { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+        .badge-smartscore { background: rgba(234,179,8,0.15); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+        .badge-kakao { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+        .badge-greenit { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        .badge-teescanner { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+        /* Result card */
+        .result-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 16px;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+        .result-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(201,168,76,0.4);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .result-card.best {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 1px rgba(201,168,76,0.3), 0 8px 32px rgba(201,168,76,0.1);
+        }
+
+        /* Best badge */
+        .best-badge {
+            background: linear-gradient(135deg, #c9a84c, #a07830);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Join type badge */
+        .join-solo { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .join-two { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+        .join-three { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.25); }
+        .join-four { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+        .join-solo-book { background: rgba(201,168,76,0.12); color: #e8d5a0; border: 1px solid rgba(201,168,76,0.25); }
+
+        /* ETA bar */
+        .eta-bar-bg { background: #1a2a3a; border-radius: 4px; height: 4px; }
+        .eta-bar-fill { height: 4px; border-radius: 4px; }
+
+        /* Loader */
+        .loader {
+            width: 44px; height: 44px;
+            border: 3px solid rgba(201,168,76,0.15);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Pulse dots */
+        .dot-pulse { animation: dotPulse 1.4s infinite; }
+        .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
+        .dot-pulse:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse {
+            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Fade in */
+        .fade-up {
+            animation: fadeUp 0.4s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sort tab */
+        .sort-tab {
+            background: transparent;
+            border: 1px solid var(--dark-border);
+            color: #7a8fa0;
+            border-radius: 8px;
+            padding: 5px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .sort-tab.active {
+            background: rgba(201,168,76,0.12);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Platform filter */
+        .platform-chip {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--dark-border);
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #7a8fa0;
+            background: transparent;
+        }
+        .platform-chip.active {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(201,168,76,0.08);
+        }
+
+        /* Modal */
+        .modal-bg { background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); }
+        .modal-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 20px;
+        }
+
+        /* Progress step */
+        .step-active { color: var(--gold); }
+        .step-done { color: var(--green); }
+        .step-wait { color: #3a5070; }
+
+        /* Divider */
+        .divider { border-color: var(--dark-border); }
+
+        /* Green btn */
+        .btn-primary {
+            background: linear-gradient(135deg, #1db87a 0%, #147a52 100%);
+            color: #fff;
+            font-weight: 700;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Book btn */
+        .btn-book {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #fff;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            font-size: 13px;
+        }
+        .btn-book:hover { opacity: 0.9; }
+
+        /* Stat pill */
+        .stat-pill {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+        }
+
+        /* Number highlight */
+        .price-main { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+
+        /* Region tag */
+        .region-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            color: #7a8fa0;
+        }
+
+        /* Scroll to top */
+        #scrollTop {
+            position: fixed; bottom: 28px; right: 24px;
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            color: #7a8fa0;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.2s;
+        }
+        #scrollTop:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #192231 25%, #1f2e40 50%, #192231 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
+        /* Comparison bar */
+        .compare-fill {
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #1db87a, #c9a84c);
+        }
+    </style>
 </head>
-<body style="margin:0;background:#0a1628;">
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
+<body>
+
+<!-- HEADER -->
+<header class="header-bg sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#1db87a,#0a8a55)">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+                </svg>
+            </div>
+            <div>
+                <div class="font-black text-lg leading-none tracking-tight text-gold-gradient">GolfMeta</div>
+                <div class="text-xs text-gray-500 leading-none mt-0.5">실시간 조인·부킹 최저가</div>
+            </div>
+        </div>
+
+        <!-- Platform indicators -->
+        <div class="hidden md:flex items-center gap-2 text-xs font-semibold">
+            <span class="badge-golfmon px-2 py-1 rounded-md">골프몬</span>
+            <span class="badge-golfpang px-2 py-1 rounded-md">골팡</span>
+            <span class="badge-smartscore px-2 py-1 rounded-md">스마트스코어</span>
+            <span class="badge-kakao px-2 py-1 rounded-md">카카오골프</span>
+            <span class="badge-greenit px-2 py-1 rounded-md">그린잇</span>
+            <span class="badge-teescanner px-2 py-1 rounded-md">티스캐너</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+            <span class="text-xs" style="color:#4ade80">실시간</span>
+            <span class="text-xs text-gray-500 ml-1">출발: <span class="text-gray-300 font-semibold">송파 잠실</span></span>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- SEARCH PANEL -->
+    <section class="search-panel p-6">
+        <div class="flex items-center gap-2 mb-5">
+            <svg class="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <h2 class="font-bold text-base text-white">조인·부킹 최저가 탐색</h2>
+            <span class="text-xs px-2 py-0.5 rounded-full ml-auto" style="background:rgba(29,184,122,0.12);color:#4ade80;border:1px solid rgba(29,184,122,0.2)">6개 플랫폼 동시 조회</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">희망 날짜</label>
+                <input type="date" id="searchDate" class="input-dark w-full px-3 py-2.5 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">티오프 시간대</label>
+                <select id="searchTime" class="input-dark w-full px-3 py-2.5 text-sm">
+                    <option value="dawn">새벽 (05:30~07:00)</option>
+                    <option value="morning" selected>오전 (07:00~09:30)</option>
+                    <option value="midday">낮 (09:30~12:00)</option>
+                    <option value="afternoon">오후 (12:00~15:00)</option>
+                    <option value="night">야간 (17:00 이후)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">조인 구성</label>
+                <select id="joinType" class="input-dark w-full px-3 py-2.5 text-sm">
+                    <option value="all">전체 (조인+4인부킹)</option>
+                    <option value="join1">1인 조인</option>
+                    <option value="join2">2인 조인</option>
+                    <option value="join3">3인 조인</option>
+                    <option value="book4">4인 단독 부킹 ★</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">최대 거리 (송파 기점)</label>
+                <select id="maxEta" class="input-dark w-full px-3 py-2.5 text-sm">
+                    <option value="60">1시간 이내</option>
+                    <option value="90" selected>1시간 30분 이내 (추천)</option>
+                    <option value="120">2시간 이내</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Advanced filters -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">최대 총비용 (1인)</label>
+                <select id="maxBudget" class="input-dark w-full px-3 py-2.5 text-sm">
+                    <option value="9999999">제한 없음</option>
+                    <option value="200000">20만원 이하</option>
+                    <option value="250000">25만원 이하</option>
+                    <option value="300000">30만원 이하</option>
+                    <option value="350000">35만원 이하</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">지역 필터</label>
+                <select id="regionFilter" class="input-dark w-full px-3 py-2.5 text-sm">
+                    <option value="all">전체 지역</option>
+                    <option value="용인">경기 용인</option>
+                    <option value="포천">경기 포천</option>
+                    <option value="여주">경기 여주</option>
+                    <option value="이천">경기 이천</option>
+                    <option value="안성">경기 안성</option>
+                    <option value="충주">충북 충주</option>
+                    <option value="춘천">강원 춘천</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">정렬 기준</label>
+                <select id="sortBy" class="input-dark w-full px-3 py-2.5 text-sm">
+                    <option value="price">총비용 낮은 순</option>
+                    <option value="eta">거리 가까운 순</option>
+                    <option value="time">티오프 빠른 순</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1.5">캐디 여부</label>
+                <select id="caddieType" class="input-dark w-full px-3 py-2.5 text-sm">
+                    <option value="all">캐디·노캐디 전체</option>
+                    <option value="caddie">캐디 동반</option>
+                    <option value="no">노캐디 (카트만)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <p class="text-xs text-gray-500">※ 그린피 기준 최저가 정렬</p>
+            <button onclick="performSearch()" class="btn-primary px-7 py-3 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                최저가 탐색 시작
+            </button>
+        </div>
+    </section>
+
+    <!-- LOADING -->
+    <div id="loadingArea" class="hidden">
+        <div class="search-panel p-8">
+            <div class="flex flex-col items-center gap-5">
+                <div class="loader"></div>
+                <div class="text-center">
+                    <p id="loadingText" class="font-semibold text-white text-sm">데이터 수집 중...</p>
+                    <p class="text-xs text-gray-500 mt-1" id="loadingSubText">잠시만 기다려 주세요</p>
+                </div>
+
+                <!-- Platform progress bars -->
+                <div class="w-full max-w-sm space-y-2" id="platformProgress">
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="badge-golfmon px-2 py-0.5 rounded text-xs font-bold w-24 text-center">골프몬</span>
+                        <div class="flex-1 eta-bar-bg overflow-hidden">
+                            <div class="eta-bar-fill bg-blue-400 progress-bar" style="width:0%"></div>
+                        </div>
+                        <span class="text-gray-500 w-8 text-right progress-pct">0%</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="badge-golfpang px-2 py-0.5 rounded text-xs font-bold w-24 text-center">골팡</span>
+                        <div class="flex-1 eta-bar-bg overflow-hidden">
+                            <div class="eta-bar-fill bg-purple-400 progress-bar" style="width:0%"></div>
+                        </div>
+                        <span class="text-gray-500 w-8 text-right progress-pct">0%</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="badge-smartscore px-2 py-0.5 rounded text-xs font-bold w-24 text-center">스마트스코어</span>
+                        <div class="flex-1 eta-bar-bg overflow-hidden">
+                            <div class="eta-bar-fill bg-yellow-400 progress-bar" style="width:0%"></div>
+                        </div>
+                        <span class="text-gray-500 w-8 text-right progress-pct">0%</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="badge-kakao px-2 py-0.5 rounded text-xs font-bold w-24 text-center">카카오골프</span>
+                        <div class="flex-1 eta-bar-bg overflow-hidden">
+                            <div class="eta-bar-fill bg-yellow-300 progress-bar" style="width:0%"></div>
+                        </div>
+                        <span class="text-gray-500 w-8 text-right progress-pct">0%</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="badge-greenit px-2 py-0.5 rounded text-xs font-bold w-24 text-center">그린잇</span>
+                        <div class="flex-1 eta-bar-bg overflow-hidden">
+                            <div class="eta-bar-fill bg-green-400 progress-bar" style="width:0%"></div>
+                        </div>
+                        <span class="text-gray-500 w-8 text-right progress-pct">0%</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="badge-teescanner px-2 py-0.5 rounded text-xs font-bold w-24 text-center">티스캐너</span>
+                        <div class="flex-1 eta-bar-bg overflow-hidden">
+                            <div class="eta-bar-fill bg-red-400 progress-bar" style="width:0%"></div>
+                        </div>
+                        <span class="text-gray-500 w-8 text-right progress-pct">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="resultsArea" class="hidden space-y-4">
+
+        <!-- Stats bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <h3 class="font-bold text-white">검색 결과 <span id="resultCount" class="text-gold">0</span>건</h3>
+                <div class="flex gap-1.5" id="platformChips">
+                    <button class="platform-chip active" data-platform="all">전체</button>
+                    <button class="platform-chip" data-platform="골프몬">골프몬</button>
+                    <button class="platform-chip" data-platform="골팡">골팡</button>
+                    <button class="platform-chip" data-platform="스마트스코어">스마트스코어</button>
+                    <button class="platform-chip" data-platform="카카오골프">카카오골프</button>
+                    <button class="platform-chip" data-platform="그린잇">그린잇</button>
+                    <button class="platform-chip" data-platform="티스캐너">티스캐너</button>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="sort-tab active" data-sort="price">💰 최저가</button>
+                <button class="sort-tab" data-sort="eta">📍 최단거리</button>
+                <button class="sort-tab" data-sort="time">⏰ 빠른 시간</button>
+            </div>
+        </div>
+
+        <!-- Summary stats -->
+        <div class="grid grid-cols-3 gap-3" id="summaryStats">
+            <div class="stat-pill px-4 py-3 text-center">
+                <div class="text-xs text-gray-400 mb-1">최저 총비용</div>
+                <div class="font-black text-gold text-lg" id="statMinPrice">—</div>
+            </div>
+            <div class="stat-pill px-4 py-3 text-center">
+                <div class="text-xs text-gray-400 mb-1">최단 소요시간</div>
+                <div class="font-black text-green-400 text-lg" id="statMinEta">—</div>
+            </div>
+            <div class="stat-pill px-4 py-3 text-center">
+                <div class="text-xs text-gray-400 mb-1">평균 절감액</div>
+                <div class="font-black text-blue-400 text-lg" id="statSaving">—</div>
+            </div>
+        </div>
+
+        <div id="resultsList" class="space-y-3"></div>
+    </div>
+
+</main>
+
+<!-- BOOKING MODAL -->
+<div id="bookingModal" class="fixed inset-0 modal-bg hidden items-center justify-center z-50 p-4">
+    <div class="modal-card w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-5">
+            <h3 class="font-bold text-white flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                AI 자동예약 에이전트
+            </h3>
+            <button onclick="closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white hover:bg-opacity-5 text-gray-400">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Course info -->
+        <div class="rounded-xl p-4 mb-5" style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2)">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="font-black text-white text-base" id="modalCourseName"></p>
+                    <p class="text-sm text-gray-400 mt-0.5" id="modalCourseDetails"></p>
+                </div>
+                <span id="modalPlatformBadge" class="text-xs font-bold px-2 py-1 rounded-lg"></span>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gold border-opacity-20 flex items-center justify-between">
+                <span class="text-xs text-gray-400">1인 총비용</span>
+                <span class="font-black text-gold text-lg" id="modalTotalCost"></span>
+            </div>
+        </div>
+
+        <!-- Process steps -->
+        <div id="modalSteps" class="space-y-3 mb-5">
+            <div class="flex items-center gap-3" id="step1">
+                <div class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold step-wait border-current">1</div>
+                <div>
+                    <p class="text-sm font-medium">Secure Enclave 세션 토큰 로드</p>
+                    <p class="text-xs text-gray-500">암호화된 인증 정보 복호화 중</p>
+                </div>
+                <div class="ml-auto step-icon-1"></div>
+            </div>
+            <div class="flex items-center gap-3" id="step2">
+                <div class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold step-wait border-current">2</div>
+                <div>
+                    <p class="text-sm font-medium">플랫폼 API POST 요청</p>
+                    <p class="text-xs text-gray-500" id="step2Sub">타깃 서버에 예약 요청 전송</p>
+                </div>
+                <div class="ml-auto step-icon-2"></div>
+            </div>
+            <div class="flex items-center gap-3" id="step3">
+                <div class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold step-wait border-current">3</div>
+                <div>
+                    <p class="text-sm font-medium">예약 확정 & 알림 발송</p>
+                    <p class="text-xs text-gray-500">카카오톡·이메일 확인 예정</p>
+                </div>
+                <div class="ml-auto step-icon-3"></div>
+            </div>
+        </div>
+
+        <!-- Success -->
+        <div id="modalSuccess" class="hidden text-center py-4">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3" style="background:rgba(29,184,122,0.12);border:2px solid rgba(29,184,122,0.3)">
+                <svg class="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <p class="font-black text-white text-lg">예약이 확정되었습니다!</p>
+            <p class="text-xs text-gray-400 mt-1">개인정보는 즉시 폐기 처리 완료</p>
+            <p class="text-xs text-green-400 mt-1">카카오톡 알림 발송 완료 ✓</p>
+        </div>
+
+        <div class="flex gap-2 mt-2">
+            <button onclick="closeModal()" id="modalCloseBtn" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-300 hover:text-white transition" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1)">
+                취소
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Scroll top -->
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path d="M5 15l7-7 7 7"/>
+    </svg>
+</button>
+
+<script>
+// ────────────────────────────────────────
+// DATA
+// ────────────────────────────────────────
+const PLATFORMS = [
+    { id: 'golfmon', name: '골프몬', badge: 'badge-golfmon' },
+    { id: 'golfpang', name: '골팡', badge: 'badge-golfpang' },
+    { id: 'smartscore', name: '스마트스코어', badge: 'badge-smartscore' },
+    { id: 'kakao', name: '카카오골프', badge: 'badge-kakao' },
+    { id: 'greenit', name: '그린잇', badge: 'badge-greenit' },
+    { id: 'teescanner', name: '티스캐너', badge: 'badge-teescanner' },
+];
+
+const REGIONS = [
+    { name: '용인', courses: ['플라자CC 용인', '88CC 용인', '태광CC', '아펠바움CC', '레이크사이드CC'], toll: 3500, gas: 7000, eta: [38, 55] },
+    { name: '이천', courses: ['88CC 이천', '사우스스프링스', '블루헤런CC', '크리스탈밸리'], toll: 4000, gas: 9500, eta: [45, 65] },
+    { name: '여주', courses: ['자유CC', '스카이밸리CC', '신라CC', '엘리시안GC'], toll: 4500, gas: 11000, eta: [55, 75] },
+    { name: '안성', courses: ['안성Q CC', '세인트포CC', '파인힐스CC'], toll: 4800, gas: 12000, eta: [58, 78] },
+    { name: '포천', courses: ['포천아도니스CC', '몽베르CC', '베어크리크CC', '라비에벨'], toll: 5000, gas: 13000, eta: [50, 70] },
+    { name: '충주', courses: ['동촌GC', '센테리움CC', '킹스데일GC'], toll: 6000, gas: 17000, eta: [80, 105] },
+    { name: '춘천', courses: ['클럽모우CC', '남춘천CC', '평화CC'], toll: 5800, gas: 16000, eta: [75, 100] },
+];
+
+const JOIN_TYPES = [
+    { label: '1인 조인', cls: 'join-solo', pax: 1, key: 'join1' },
+    { label: '2인 조인', cls: 'join-two', pax: 2, key: 'join2' },
+    { label: '3인 조인', cls: 'join-three', pax: 3, key: 'join3' },
+    { label: '4인 단독부킹', cls: 'join-solo-book', pax: 4, key: 'book4' },
+];
+
+const TIMES = {
+    dawn: [['05','30'],['05','45'],['06','00'],['06','15']],
+    morning: [['07','00'],['07','15'],['07','30'],['07','45'],['08','00'],['08','15'],['08','30'],['08','45'],['09','00'],['09','15']],
+    midday: [['09','30'],['10','00'],['10','30'],['11','00'],['11','30']],
+    afternoon: [['12','00'],['12','30'],['13','00'],['13','30'],['14','00'],['14','30']],
+    night: [['17','00'],['17','30'],['18','00'],['18','30'],['19','00']],
+};
+
+let allResults = [];
+let activeFilter = 'all';
+let activeSort = 'price';
+
+// ────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('searchDate');
+    const today = new Date();
+    const diff = (6 - today.getDay() + 7) % 7 || 7;
+    const sat = new Date(today);
+    sat.setDate(today.getDate() + diff);
+    dateInput.valueAsDate = sat;
+
+    // Sort tabs
+    document.querySelectorAll('.sort-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeSort = btn.dataset.sort;
+            renderResults(sortResults([...allResults]));
+        });
+    });
+
+    // Platform chips
+    document.getElementById('platformChips').addEventListener('click', e => {
+        const chip = e.target.closest('.platform-chip');
+        if (!chip) return;
+        document.querySelectorAll('.platform-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeFilter = chip.dataset.platform;
+        const filtered = activeFilter === 'all' ? allResults : allResults.filter(r => r.source === activeFilter);
+        renderResults(sortResults(filtered));
+        document.getElementById('resultCount').innerText = filtered.length;
+    });
+
+    // Scroll to top
+    window.addEventListener('scroll', () => {
+        const btn = document.getElementById('scrollTop');
+        btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+    });
+});
+
+// ────────────────────────────────────────
+// MOCK DATA
+// ────────────────────────────────────────
+function generateMockData() {
+    const maxEta = parseInt(document.getElementById('maxEta').value);
+    const joinFilter = document.getElementById('joinType').value;
+    const maxBudget = parseInt(document.getElementById('maxBudget').value);
+    const regionFilter = document.getElementById('regionFilter').value;
+    const caddieFilter = document.getElementById('caddieType').value;
+    const timeSlot = document.getElementById('searchTime').value;
+
+    const results = [];
+    const targetCount = Math.floor(Math.random() * 8) + 10; // 10~17
+
+    for (let i = 0; i < targetCount * 3; i++) {
+        const region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
+        if (regionFilter !== 'all' && region.name !== regionFilter) continue;
+
+        const eta = Math.floor(Math.random() * (region.eta[1] - region.eta[0])) + region.eta[0];
+        if (eta > maxEta) continue;
+
+        const platform = PLATFORMS[Math.floor(Math.random() * PLATFORMS.length)];
+        const course = region.courses[Math.floor(Math.random() * region.courses.length)];
+
+        const availableJoins = ['join1','join2','join3','book4'];
+        const jKey = joinFilter === 'all'
+            ? availableJoins[Math.floor(Math.random() * availableJoins.length)]
+            : joinFilter;
+        const joinDef = JOIN_TYPES.find(j => j.key === jKey);
+
+        const times = TIMES[timeSlot] || TIMES.morning;
+        const t = times[Math.floor(Math.random() * times.length)];
+        const timeStr = `${t[0]}:${t[1]}`;
+
+        const hasCaddie = Math.random() > 0.3;
+        if (caddieFilter === 'caddie' && !hasCaddie) continue;
+        if (caddieFilter === 'no' && hasCaddie) continue;
+
+        // Pricing
+        const greenFee = (Math.floor(Math.random() * 14) + 12) * 10000; // 12~25만원
+        const totalCost = greenFee;
+
+        if (totalCost > maxBudget) continue;
+
+        results.push({
+            id: `r_${Math.random().toString(36).substr(2,8)}`,
+            region: region.name,
+            course,
+            time: timeStr,
+            eta,
+            source: platform.name,
+            sourceBadge: platform.badge,
+            greenFee,
+            cartFee,
+            caddieFee,
+            hasCaddie,
+            toll: region.toll,
+            gas: region.gas,
+            totalCost,
+            joinLabel: joinDef.label,
+            joinCls: joinDef.cls,
+            joinKey: jKey,
+            pax: joinDef.pax,
+        });
+
+        if (results.length >= 15) break;
+    }
+
+    return results;
+}
+
+function sortResults(data) {
+    if (activeSort === 'price') return data.sort((a,b) => a.totalCost - b.totalCost);
+    if (activeSort === 'eta') return data.sort((a,b) => a.eta - b.eta);
+    if (activeSort === 'time') return data.sort((a,b) => a.time.localeCompare(b.time));
+    return data;
+}
+
+// ────────────────────────────────────────
+// SEARCH
+// ────────────────────────────────────────
+function performSearch() {
+    const date = document.getElementById('searchDate').value;
+    if (!date) { alert('날짜를 선택해주세요.'); return; }
+
+    document.getElementById('resultsArea').classList.add('hidden');
+    document.getElementById('loadingArea').classList.remove('hidden');
+
+    // Animate progress bars
+    const bars = document.querySelectorAll('.progress-bar');
+    const pcts = document.querySelectorAll('.progress-pct');
+    const targets = [100, 87, 94, 78, 91, 83];
+    let start = null;
+    const duration = 3200;
+
+    function animateBars(ts) {
+        if (!start) start = ts;
+        const progress = Math.min((ts - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 2);
+        bars.forEach((bar, i) => {
+            const pct = Math.floor(ease * targets[i]);
+            bar.style.width = pct + '%';
+            pcts[i].innerText = pct + '%';
+        });
+        if (progress < 1) requestAnimationFrame(animateBars);
+    }
+    requestAnimationFrame(animateBars);
+
+    const loadTexts = [
+        ['골프몬·골팡 실시간 조인 데이터 수집 중...', '비동기 패킷 스캔 중'],
+        ['스마트스코어·카카오골프 조회 중...', '300+ 골프장 가용 티타임 확인'],
+        ['그린잇·티스캐너 데이터 병합 중...', '370개 골프장 비교 분석'],
+        ['카카오내비 ETA 산출 중...', '송파 출발 기점 실시간 교통 반영'],
+        ['그린피·카트·캐디비 정규화 중...', '톨게이트·유류비 통합 계산'],
+        ['최저가 랭킹 정렬 완료 중...', '총 6개 플랫폼 크로스체크 완료'],
+    ];
+    let textIdx = 0;
+    const textTimer = setInterval(() => {
+        textIdx = Math.min(textIdx + 1, loadTexts.length - 1);
+        document.getElementById('loadingText').innerText = loadTexts[textIdx][0];
+        document.getElementById('loadingSubText').innerText = loadTexts[textIdx][1];
+    }, 550);
+
+    setTimeout(() => {
+        clearInterval(textTimer);
+        document.getElementById('loadingArea').classList.add('hidden');
+
+        allResults = generateMockData();
+        activeFilter = 'all';
+        activeSort = document.querySelector('.sort-tab.active')?.dataset.sort || 'price';
+        document.querySelectorAll('.platform-chip').forEach(c => c.classList.remove('active'));
+        document.querySelector('.platform-chip[data-platform="all"]').classList.add('active');
+
+        const sorted = sortResults([...allResults]);
+        updateStats(sorted);
+        renderResults(sorted);
+        document.getElementById('resultCount').innerText = sorted.length;
+        document.getElementById('resultsArea').classList.remove('hidden');
+        document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 3500);
+}
+
+function updateStats(data) {
+    if (!data.length) return;
+    const minPrice = Math.min(...data.map(d => d.totalCost));
+    const minEta = Math.min(...data.map(d => d.eta));
+    const avgPrice = data.reduce((a,b) => a + b.totalCost, 0) / data.length;
+    const saving = Math.round(avgPrice - minPrice);
+    document.getElementById('statMinPrice').innerText = formatCurrency(minPrice);
+    document.getElementById('statMinEta').innerText = minEta + '분';
+    document.getElementById('statSaving').innerText = '평균比 ' + formatCurrency(saving) + ' ↓';
+}
+
+// ────────────────────────────────────────
+// RENDER CARDS
+// ────────────────────────────────────────
+function renderResults(data) {
+    const list = document.getElementById('resultsList');
+    list.innerHTML = '';
+
+    if (!data.length) {
+        list.innerHTML = `<div class="search-panel p-10 text-center text-gray-500">
+            <p class="text-3xl mb-3">🔍</p>
+            <p class="font-semibold">검색 결과가 없습니다</p>
+            <p class="text-sm mt-1">필터 조건을 완화해 보세요</p>
+        </div>`;
+        return;
+    }
+
+    const maxCost = Math.max(...data.map(d => d.totalCost));
+    const minCost = Math.min(...data.map(d => d.totalCost));
+
+    data.forEach((item, idx) => {
+        const isBest = idx === 0;
+        const delay = Math.min(idx * 60, 400);
+        const barWidth = maxCost > minCost
+            ? Math.round((1 - (item.totalCost - minCost) / (maxCost - minCost)) * 100)
+            : 100;
+
+        const etaColor = item.eta <= 55 ? '#4ade80' : item.eta <= 75 ? '#facc15' : '#fb923c';
+        const savings = idx > 0 ? item.totalCost - data[0].totalCost : 0;
+
+        const card = `
+<div class="result-card p-5 fade-up ${isBest ? 'best' : ''}" style="animation-delay:${delay}ms">
+    ${isBest ? `<div class="flex items-center gap-2 mb-3">
+        <span class="best-badge">★ AI 최저가 추천</span>
+        <span class="text-xs text-gray-500">6개 플랫폼 중 종합 1위</span>
+    </div>` : ''}
+
+    <div class="flex flex-col md:flex-row gap-4">
+        <!-- Left: Info -->
+        <div class="flex-1 min-w-0">
+            <!-- Platform + tags -->
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+                <span class="${item.sourceBadge} text-xs font-bold px-2.5 py-1 rounded-lg">${item.source}</span>
+                <span class="region-tag">${item.region}</span>
+                <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${item.joinCls}">${item.joinLabel}</span>
+                ${!item.hasCaddie ? `<span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.05);color:#7a8fa0;border:1px solid rgba(255,255,255,0.1)">노캐디</span>` : ''}
+            </div>
+
+            <!-- Course name + time -->
+            <div class="flex items-baseline gap-2 mb-2">
+                <h4 class="text-lg font-black text-white truncate">${item.course}</h4>
+                <span class="text-sm font-medium shrink-0" style="color:var(--gold)">${item.time} 티오프</span>
+            </div>
+
+            <!-- ETA + cost breakdown -->
+            <div class="flex flex-wrap gap-4 text-sm text-gray-400 mb-3">
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    송파 출발 <strong style="color:${etaColor}">${item.eta}분</strong>
+                </span>
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                    그린피 <span class="text-gray-300">${formatCurrency(item.greenFee)}</span>
+                </span>
+            </div>
+
+            <!-- Cost comparison bar -->
+            <div>
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>비용 효율</span>
+                    <span>${barWidth}점</span>
+                </div>
+                <div class="eta-bar-bg w-full">
+                    <div class="compare-fill transition-all duration-700" style="width:${barWidth}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Price + Button -->
+        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-3 md:pl-5 md:border-l pt-3 md:pt-0 border-t md:border-t-0" style="border-color:var(--dark-border);min-width:160px">
+            <div class="text-right">
+                <p class="text-xs text-gray-500 mb-0.5">그린피</p>
+                <p class="price-main text-white">${formatCurrency(item.totalCost)}</p>
+                ${savings > 0
+                    ? `<p class="text-xs mt-1" style="color:#f87171">최저가比 +${formatCurrency(savings)}</p>`
+                    : `<p class="text-xs mt-1" style="color:#4ade80">✓ 최저가</p>`
+                }
+            </div>
+            <button
+                onclick="openBookingModal('${item.course}','${item.time}','${item.source}','${item.sourceBadge}','${item.joinLabel}','${item.totalCost}')"
+                class="btn-book px-5 py-2.5 flex items-center gap-1.5 shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                AI 자동예약
+            </button>
+        </div>
+    </div>
+</div>`;
+        list.insertAdjacentHTML('beforeend', card);
+    });
+}
+
+// ────────────────────────────────────────
+// MODAL
+// ────────────────────────────────────────
+function openBookingModal(course, time, source, badgeCls, joinLabel, totalCost) {
+    const date = document.getElementById('searchDate').value;
+    document.getElementById('modalCourseName').innerText = course;
+    document.getElementById('modalCourseDetails').innerText = `${date} ${time} 티오프 · ${joinLabel}`;
+    document.getElementById('modalTotalCost').innerText = formatCurrency(parseInt(totalCost));
+
+    const pb = document.getElementById('modalPlatformBadge');
+    pb.className = `text-xs font-bold px-2 py-1 rounded-lg ${badgeCls}`;
+    pb.innerText = source;
+
+    // Reset steps
+    document.getElementById('modalSuccess').classList.add('hidden');
+    document.getElementById('modalSteps').classList.remove('hidden');
+    document.getElementById('modalCloseBtn').innerText = '취소';
+
+    ['1','2','3'].forEach(n => {
+        const el = document.getElementById(`step${n}`);
+        el.querySelector('div').className = 'w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold step-wait border-current';
+        const icon = el.querySelector(`.step-icon-${n}`);
+        if (icon) icon.innerHTML = '';
+    });
+
+    document.getElementById('bookingModal').classList.remove('hidden');
+    document.getElementById('bookingModal').classList.add('flex');
+
+    // Animate steps
+    const stepDelay = [400, 1100, 1900];
+    const doneDelay = [800, 1500, 2300];
+
+    stepDelay.forEach((d, i) => {
+        setTimeout(() => {
+            const el = document.getElementById(`step${i+1}`);
+            el.querySelector('div').className = 'w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold step-active border-current';
+        }, d);
+    });
+
+    doneDelay.forEach((d, i) => {
+        setTimeout(() => {
+            const el = document.getElementById(`step${i+1}`);
+            el.querySelector('div').className = 'w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold step-done border-current';
+            const icon = el.querySelector(`.step-icon-${i+1}`);
+            if (icon) icon.innerHTML = `<svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>`;
+        }, d);
+    });
+
+    setTimeout(() => {
+        document.getElementById('modalSteps').classList.add('hidden');
+        document.getElementById('modalSuccess').classList.remove('hidden');
+        document.getElementById('modalCloseBtn').innerText = '닫기';
+    }, 2800);
+}
+
+function closeModal() {
+    document.getElementById('bookingModal').classList.add('hidden');
+    document.getElementById('bookingModal').classList.remove('flex');
+}
+
+// ────────────────────────────────────────
+// UTIL
+// ────────────────────────────────────────
+function formatCurrency(n) {
+    if (n >= 10000) {
+        const man = Math.floor(n / 10000);
+        const rem = n % 10000;
+        return rem ? `${man}만 ${rem.toLocaleString()}원` : `${man}만원`;
+    }
+    return n.toLocaleString() + '원';
+}
+</script>
 </body>
 </html>
