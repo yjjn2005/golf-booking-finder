@@ -132,6 +132,11 @@
         </div>
 
         <div class="flex items-center gap-2">
+            <button onclick="openLoginPanel()" id="loginBtn"
+                class="hidden text-xs px-3 py-1.5 rounded-full font-semibold border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 flex items-center gap-1.5 transition">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span id="loginBtnTxt">로그인 설정</span>
+            </button>
             <div id="srvBadge" class="srv-off text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
                 <span id="srvDot" class="w-2 h-2 rounded-full bg-red-400 inline-block"></span>
                 <span id="srvTxt">서버 미연결</span>
@@ -332,6 +337,40 @@
 
 </main>
 
+<!-- LOGIN PANEL MODAL -->
+<div id="loginPanel" class="fixed inset-0 hidden items-center justify-center z-50 p-4" style="background:rgba(0,0,0,.5)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-screen overflow-y-auto">
+        <!-- 헤더 -->
+        <div class="flex justify-between items-center p-6 border-b border-gray-100">
+            <div>
+                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    플랫폼 로그인 설정
+                </h3>
+                <p class="text-xs text-gray-400 mt-1">로그인하면 실시간 잔여 티타임을 자동 수집합니다</p>
+            </div>
+            <button onclick="closeLoginPanel()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- 보안 안내 -->
+        <div class="mx-6 mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-700 flex gap-2">
+            <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span>자격증명은 이 PC 외부로 전송되지 않습니다. 로그인 후 <strong>쿠키만 로컬 저장</strong>되며 비밀번호는 메모리에서 즉시 삭제됩니다.</span>
+        </div>
+
+        <!-- 플랫폼 목록 -->
+        <div class="p-6 space-y-3" id="loginPlatformList">
+            <!-- JS로 렌더링 -->
+        </div>
+
+        <div class="px-6 pb-6">
+            <button onclick="closeLoginPanel()" class="w-full py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-sm transition">닫기</button>
+        </div>
+    </div>
+</div>
+
 <!-- SAFELINK MODAL (앱으로 이동) -->
 <div id="modal" class="fixed inset-0 hidden items-center justify-center z-50 p-4" style="background:rgba(0,0,0,.5)">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
@@ -472,17 +511,135 @@ async function checkServer() {
     } catch { serverOnline = false; }
     const badge=document.getElementById('srvBadge'), dot=document.getElementById('srvDot'), txt=document.getElementById('srvTxt');
     const btn=document.getElementById('realSearchBtn');
+    const loginBtn=document.getElementById('loginBtn');
     if (serverOnline) {
         badge.className='srv-on text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5';
         dot.className='w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block';
         txt.innerText='실시간 연결됨';
         btn?.classList.remove('hidden');
+        loginBtn?.classList.remove('hidden');
+        refreshLoginStatus();
     } else {
         badge.className='srv-off text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5';
         dot.className='w-2 h-2 rounded-full bg-red-400 inline-block';
         txt.innerText='서버 미연결';
         btn?.classList.add('hidden');
+        loginBtn?.classList.add('hidden');
     }
+}
+
+// ─────────────────────────────────────────
+// 로그인 패널
+// ─────────────────────────────────────────
+let _loginStatus = [];
+
+const PLAT_LOGIN = {
+    golfmon:    { name:'골프몬',      cls:'b-golfmon',    idLabel:'골프몬 아이디',     note:'' },
+    golfpang:   { name:'골팡',        cls:'b-golfpang',   idLabel:'골팡 아이디',       note:'' },
+    smartscore: { name:'스마트스코어', cls:'b-smartscore', idLabel:'스마트스코어 ID',   note:'' },
+    kakao:      { name:'카카오골프',   cls:'b-kakao',      idLabel:'카카오 이메일/전화', note:'카카오 계정으로 로그인' },
+    teescanner: { name:'티스캐너',    cls:'b-teescanner', idLabel:'골프존 아이디',     note:'골프존 계정으로 로그인' },
+};
+
+async function refreshLoginStatus() {
+    if (!serverOnline) return;
+    try {
+        const r = await fetch(`${API}/api/login/status`);
+        _loginStatus = await r.json();
+        // 로그인된 플랫폼 수
+        const loggedIn = _loginStatus.filter(s=>s.loggedIn).length;
+        const btn = document.getElementById('loginBtnTxt');
+        if (btn) btn.innerText = loggedIn > 0 ? `로그인 ${loggedIn}개` : '로그인 설정';
+    } catch {}
+}
+
+function openLoginPanel() {
+    renderLoginList();
+    document.getElementById('loginPanel').classList.remove('hidden');
+    document.getElementById('loginPanel').classList.add('flex');
+}
+function closeLoginPanel() {
+    document.getElementById('loginPanel').classList.add('hidden');
+    document.getElementById('loginPanel').classList.remove('flex');
+}
+
+function renderLoginList() {
+    const container = document.getElementById('loginPlatformList');
+    container.innerHTML = Object.entries(PLAT_LOGIN).map(([id, def]) => {
+        const status = _loginStatus.find(s => s.id === id);
+        const loggedIn = status?.loggedIn || false;
+        const savedAt  = status?.savedAt ? new Date(status.savedAt).toLocaleString('ko-KR') : '';
+        return `
+<div class="border border-gray-200 rounded-xl p-4 ${loggedIn ? 'bg-emerald-50 border-emerald-200' : 'bg-white'}">
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+            <span class="${def.cls} text-xs font-bold px-2.5 py-1 rounded-lg">${def.name}</span>
+            ${def.note ? `<span class="text-xs text-gray-400">${def.note}</span>` : ''}
+        </div>
+        ${loggedIn
+            ? `<div class="flex items-center gap-2">
+                   <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+                       로그인됨
+                   </span>
+                   <button onclick="doLogout('${id}')" class="text-xs text-gray-400 hover:text-red-500 transition">로그아웃</button>
+               </div>`
+            : `<span class="text-xs text-gray-400">미로그인</span>`
+        }
+    </div>
+    ${loggedIn
+        ? `<p class="text-xs text-emerald-600">✓ 저장시각: ${savedAt}</p>`
+        : `<div class="space-y-2">
+               <input type="text"     id="id_${id}"  placeholder="${def.idLabel}" class="inp text-sm" style="font-size:13px">
+               <input type="password" id="pw_${id}"  placeholder="비밀번호"       class="inp text-sm" style="font-size:13px">
+               <button onclick="doLogin('${id}')" id="btn_${id}"
+                   class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition flex items-center justify-center gap-2">
+                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 16l-4-4m0 0l4-4m-4 4h14"/></svg>
+                   로그인
+               </button>
+           </div>`
+    }
+</div>`;
+    }).join('');
+}
+
+async function doLogin(platformId) {
+    const id = document.getElementById(`id_${platformId}`)?.value?.trim();
+    const pw = document.getElementById(`pw_${platformId}`)?.value;
+    if (!id || !pw) { alert('아이디와 비밀번호를 모두 입력하세요.'); return; }
+
+    const btn = document.getElementById(`btn_${platformId}`);
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> 로그인 중... (브라우저 창 확인)';
+    }
+
+    try {
+        const r = await fetch(`${API}/api/login/${platformId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, pw }),
+        });
+        const result = await r.json();
+        if (result.success) {
+            alert(`✅ ${result.platform} 로그인 성공!\n이제 실시간 조회 시 해당 플랫폼 데이터를 가져옵니다.`);
+            await refreshLoginStatus();
+            renderLoginList();
+        } else {
+            alert(`❌ ${result.platform} 로그인 실패\n${result.error || 'ID/PW를 확인하거나 CAPTCHA가 있으면 직접 입력하세요.'}`);
+            if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 16l-4-4m0 0l4-4m-4 4h14"/></svg> 로그인'; }
+        }
+    } catch (e) {
+        alert('서버 오류: ' + e.message);
+        if (btn) { btn.disabled = false; btn.innerHTML = '로그인'; }
+    }
+}
+
+async function doLogout(platformId) {
+    if (!confirm('로그아웃하면 저장된 쿠키가 삭제됩니다. 계속하시겠습니까?')) return;
+    await fetch(`${API}/api/login/${platformId}`, { method: 'DELETE' });
+    await refreshLoginStatus();
+    renderLoginList();
 }
 
 // ─────────────────────────────────────────
