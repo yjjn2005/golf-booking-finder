@@ -3,124 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GolfMeta — 실시간 최저가 조인·부킹</title>
+    <title>GolfMeta SafeLink — 실시간 조인·부킹 최저가</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root{--gold:#c9a84c;--gold-l:#e8d5a0;--dark:#0f1923;--card:#192231;--border:#2a3a4a;--green:#1db87a}
-        *{font-family:'Noto Sans KR',sans-serif}
-        body{background:var(--dark);color:#e8edf2}
-        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--dark)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+        * { font-family: 'Noto Sans KR', sans-serif; }
+        body { background: #f8faf9; color: #1a2e22; }
 
-        .gold-text{background:linear-gradient(135deg,#e8d5a0,#c9a84c,#a07830);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .panel{background:var(--card);border:1px solid var(--border);border-radius:16px}
-        .inp{background:#0f1923;border:1px solid var(--border);color:#e8edf2;border-radius:10px;padding:10px 12px;font-size:14px;width:100%;transition:.2s}
-        .inp:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.15)}
-        .inp option{background:#192231}
-        select.inp{cursor:pointer}
+        .loader {
+            border: 3px solid #d1fae5;
+            border-top: 3px solid #059669;
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            animation: spin .85s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Tabs */
-        .tab-on{background:rgba(201,168,76,.15);border:1px solid var(--gold);color:var(--gold);border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
-        .tab-off{background:transparent;border:1px solid var(--border);color:#7a8fa0;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
-        .tab-off:hover{border-color:#4a6070;color:#a0b4c0}
+        .fade-in { animation: fadeIn .4s ease-in; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-        /* Buttons */
-        .btn-green{background:linear-gradient(135deg,#1db87a,#147a52);color:#fff;font-weight:700;border-radius:12px;border:none;cursor:pointer;padding:11px 28px;font-size:14px;display:flex;align-items:center;gap:8px;transition:.2s}
-        .btn-green:hover{opacity:.9}
-        .btn-green:active{transform:scale(.98)}
-        .btn-blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-weight:700;border-radius:10px;border:none;cursor:pointer;padding:9px 18px;font-size:13px;display:flex;align-items:center;gap:6px;transition:.2s}
-        .btn-blue:hover{opacity:.9}
-        .btn-gold{background:linear-gradient(135deg,#c9a84c,#a07830);color:#fff;font-weight:700;border-radius:10px;border:none;cursor:pointer;padding:9px 18px;font-size:13px;display:flex;align-items:center;gap:6px;transition:.2s}
-        .btn-gold:hover{opacity:.9}
+        /* Platform badge colors */
+        .b-golfmon    { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+        .b-golfpang   { background:#faf5ff; color:#7c3aed; border:1px solid #ddd6fe; }
+        .b-smartscore { background:#fefce8; color:#a16207; border:1px solid #fde68a; }
+        .b-kakao      { background:#fffbeb; color:#b45309; border:1px solid #fcd34d; }
+        .b-greenit    { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+        .b-teescanner { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; }
 
-        /* Platform badges */
-        .b-golfmon   {background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
-        .b-golfpang  {background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
-        .b-smart     {background:rgba(234,179,8,.15);color:#facc15;border:1px solid rgba(234,179,8,.3)}
-        .b-kakao     {background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
-        .b-greenit   {background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
-        .b-teescanner{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+        /* Join type badge */
+        .j1 { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+        .j2 { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+        .j3 { background:#faf5ff; color:#7c3aed; border:1px solid #e9d5ff; }
+        .j4 { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
 
-        /* Join type */
-        .j1{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25)}
-        .j2{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.25)}
-        .j3{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.25)}
-        .j4{background:rgba(201,168,76,.12);color:#e8d5a0;border:1px solid rgba(201,168,76,.25)}
+        /* Card */
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            transition: box-shadow .2s, border-color .2s;
+        }
+        .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.1); border-color: #6ee7b7; }
+        .card.best  { border-color: #059669; box-shadow: 0 0 0 2px rgba(5,150,105,.15); }
 
-        /* Result card */
-        .rcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;transition:.2s}
-        .rcard:hover{transform:translateY(-2px);border-color:rgba(201,168,76,.4);box-shadow:0 8px 32px rgba(0,0,0,.4)}
-        .rcard.best{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,168,76,.3),0 8px 24px rgba(201,168,76,.1)}
+        /* Progress bar */
+        .prog-bg  { background: #e5e7eb; border-radius: 3px; height: 4px; overflow: hidden; }
+        .prog-fill{ height: 4px; border-radius: 3px; }
 
-        /* Loader */
-        .spin{width:42px;height:42px;border:3px solid rgba(201,168,76,.15);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
+        /* Sort chip */
+        .chip { background: transparent; border: 1px solid #d1d5db; color: #6b7280; border-radius: 8px; padding: 4px 12px; font-size: 12px; cursor: pointer; transition: .15s; }
+        .chip.on { background: #ecfdf5; border-color: #059669; color: #065f46; font-weight: 700; }
 
-        /* Platform scrape status */
-        .plat-row{display:flex;align-items:center;gap:10px;font-size:12px}
-        .plat-bar-bg{flex:1;background:#1a2a3a;border-radius:3px;height:4px;overflow:hidden}
-        .plat-bar{height:4px;border-radius:3px;transition:width .4s}
-        .plat-pct{width:32px;text-align:right;color:#4a6070}
-        .plat-status{width:16px;text-align:center}
+        /* Tab */
+        .tab-on  { background: #ecfdf5; border: 1.5px solid #059669; color: #065f46; font-weight: 700; border-radius: 10px; padding: 8px 18px; font-size: 13px; cursor: pointer; }
+        .tab-off { background: transparent; border: 1.5px solid #e5e7eb; color: #9ca3af; border-radius: 10px; padding: 8px 18px; font-size: 13px; cursor: pointer; }
+        .tab-off:hover { border-color: #d1d5db; color: #6b7280; }
+
+        /* Input */
+        .inp { border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 9px 12px; font-size: 14px; width: 100%; transition: .2s; color: #1a2e22; background: #fff; }
+        .inp:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,.1); }
+        .inp option { background: #fff; }
+
+        /* Green button */
+        .btn-green { background: #059669; color: #fff; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; padding: 10px 26px; font-size: 14px; transition: .15s; display: flex; align-items: center; gap: 7px; }
+        .btn-green:hover  { background: #047857; }
+        .btn-green:active { transform: scale(.98); }
+
+        /* Blue button (앱 이동) */
+        .btn-app { background: #2563eb; color: #fff; font-weight: 700; border-radius: 9px; border: none; cursor: pointer; padding: 9px 18px; font-size: 13px; transition: .15s; display: flex; align-items: center; gap: 6px; }
+        .btn-app:hover { background: #1d4ed8; }
+
+        /* Gold button */
+        .btn-gold { background: linear-gradient(135deg,#d97706,#b45309); color:#fff; font-weight:700; border-radius:9px; border:none; cursor:pointer; padding:9px 18px; font-size:13px; transition:.15s; display:flex; align-items:center; gap:6px; }
+        .btn-gold:hover { opacity:.9; }
+
+        /* Stat card */
+        .stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px 16px; text-align:center; }
+
+        /* Platform link card (직접검색) */
+        .plink { background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:12px; padding:14px; text-decoration:none; display:flex; flex-direction:column; gap:8px; transition:.2s; cursor:pointer; }
+        .plink:hover { border-color:#6ee7b7; background:#f0fdf4; transform:translateY(-1px); }
+
+        /* Info box */
+        .info-box { background:#f0fdf4; border:1px solid #6ee7b7; border-radius:12px; padding:16px; }
+        .info-stat { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:10px 8px; text-align:center; }
+        .info-stat .lbl { font-size:10px; color:#6b7280; margin-bottom:3px; }
+        .info-stat .val { font-size:14px; font-weight:800; }
 
         /* Comparison bar */
-        .cmp-bar{height:5px;border-radius:3px;background:linear-gradient(90deg,#1db87a,#c9a84c)}
+        .cmp-bar { height:5px; border-radius:3px; background:linear-gradient(90deg,#059669,#34d399); }
 
-        /* Server status pill */
-        .srv-on {background:rgba(29,184,122,.12);color:#4ade80;border:1px solid rgba(29,184,122,.25)}
-        .srv-off{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+        /* Server badge */
+        .srv-on  { background:#f0fdf4; color:#15803d; border:1px solid #86efac; }
+        .srv-off { background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; }
 
-        /* Platform link card */
-        .plink{background:#0f1923;border:1px solid var(--border);border-radius:12px;padding:14px;text-decoration:none;display:flex;flex-direction:column;gap:8px;transition:.2s;cursor:pointer}
-        .plink:hover{border-color:rgba(201,168,76,.5);transform:translateY(-2px)}
-
-        /* Info stat */
-        .istat{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center}
-        .istat .lbl{font-size:10px;color:#7a8fa0;margin-bottom:4px}
-        .istat .val{font-size:15px;font-weight:800}
-
-        /* Sort tab */
-        .sort-tab{background:transparent;border:1px solid var(--border);color:#7a8fa0;border-radius:8px;padding:5px 13px;font-size:12px;cursor:pointer;transition:.15s}
-        .sort-tab.on{background:rgba(201,168,76,.12);border-color:var(--gold);color:var(--gold)}
-
-        .fade-up{animation:fu .35s ease both}
-        @keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-
-        #scrollTop{position:fixed;bottom:24px;right:20px;background:var(--card);border:1px solid var(--border);color:#7a8fa0;width:38px;height:38px;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:100;transition:.2s}
-        #scrollTop:hover{border-color:var(--gold);color:var(--gold)}
+        /* Scroll top */
+        #scrollTop { position:fixed; bottom:24px; right:20px; background:#fff; border:1.5px solid #e5e7eb; color:#6b7280; width:38px; height:38px; border-radius:50%; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.1); transition:.2s; }
+        #scrollTop:hover { border-color:#059669; color:#059669; }
     </style>
 </head>
 <body>
 
 <!-- HEADER -->
-<header style="background:linear-gradient(180deg,#0a1520,#0f1923);border-bottom:1px solid var(--border)" class="sticky top-0 z-50">
+<header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#1db87a,#0a8a55)">
-                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
             <div>
-                <div class="gold-text font-black text-lg leading-none tracking-tight">GolfMeta</div>
-                <div class="text-xs text-gray-500 mt-0.5">실시간 조인·부킹 최저가</div>
+                <div class="font-black text-lg text-emerald-700 leading-none">GolfMeta</div>
+                <div class="text-xs text-gray-400 mt-0.5">SafeLink · 조인·부킹 최저가</div>
             </div>
         </div>
 
-        <div class="hidden md:flex items-center gap-1.5 text-xs font-bold">
+        <div class="hidden md:flex items-center gap-1.5 text-xs font-semibold">
             <span class="b-golfmon px-2 py-1 rounded-md">골프몬</span>
             <span class="b-golfpang px-2 py-1 rounded-md">골팡</span>
-            <span class="b-smart px-2 py-1 rounded-md">스마트스코어</span>
+            <span class="b-smartscore px-2 py-1 rounded-md">스마트스코어</span>
             <span class="b-kakao px-2 py-1 rounded-md">카카오골프</span>
             <span class="b-greenit px-2 py-1 rounded-md">그린잇</span>
             <span class="b-teescanner px-2 py-1 rounded-md">티스캐너</span>
         </div>
 
-        <div class="flex items-center gap-3">
-            <!-- 서버 연결 상태 -->
+        <div class="flex items-center gap-2">
             <div id="srvBadge" class="srv-off text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
-                <span id="srvDot" class="w-2 h-2 rounded-full bg-red-400"></span>
+                <span id="srvDot" class="w-2 h-2 rounded-full bg-red-400 inline-block"></span>
                 <span id="srvTxt">서버 미연결</span>
             </div>
-            <span class="text-xs text-gray-500">출발: <span class="text-gray-300 font-semibold">송파 잠실</span></span>
+            <span class="text-xs text-gray-400">출발: <span class="font-semibold text-gray-600">송파 잠실</span></span>
         </div>
     </div>
 </header>
@@ -128,31 +144,26 @@
 <!-- MAIN -->
 <main class="max-w-5xl mx-auto px-4 py-6 space-y-5">
 
-    <!-- NOTICE BANNER (서버 미연결 시) -->
-    <div id="noticeBanner" class="hidden rounded-xl p-4 text-sm" style="background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25)">
-        <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-            <div>
-                <p class="font-bold text-yellow-300">로컬 API 서버가 실행 중이 아닙니다</p>
-                <p class="text-yellow-200 text-xs mt-1">실시간 데이터를 보려면 <code class="bg-black bg-opacity-30 px-1 rounded">golf-api\시작.bat</code> 를 실행하세요. 그 전까지는 플랫폼 직접 링크를 사용하세요.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- SEARCH PANEL -->
-    <section class="panel p-6">
+    <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+
         <!-- 탭 -->
         <div class="flex items-center gap-2 mb-5 flex-wrap">
             <button id="tabAuto"   onclick="switchTab('auto')"   class="tab-on">🔍 자동 탐색</button>
-            <button id="tabManual" onclick="switchTab('manual')" class="tab-off">✏️ 골프장 직접 검색</button>
-            <span class="text-xs px-2.5 py-1 rounded-full ml-auto" style="background:rgba(29,184,122,.12);color:#4ade80;border:1px solid rgba(29,184,122,.2)">6개 플랫폼 동시 조회</span>
+            <button id="tabManual" onclick="switchTab('manual')" class="tab-off">📋 골프장 직접 검색</button>
+            <span class="text-xs px-2.5 py-1 rounded-full ml-auto bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">6개 플랫폼 동시 조회</span>
         </div>
+        <p class="text-xs text-gray-400 mb-4 -mt-2">※ 타 플랫폼 이용약관 준수를 위해 앱 내 직접 예약 없이 공식 앱으로 안전하게 이동합니다 (SafeLink)</p>
 
         <!-- ── 자동 탐색 ── -->
         <div id="pAuto">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                <div><label class="lbl">희망 날짜</label><input type="date" id="searchDate" class="inp"></div>
-                <div><label class="lbl">티오프 시간대</label>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">희망 날짜</label>
+                    <input type="date" id="searchDate" class="inp">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">티오프 시간대</label>
                     <select id="searchTime" class="inp">
                         <option value="dawn">새벽 (05:30~07:00)</option>
                         <option value="morning" selected>오전 (07:00~09:30)</option>
@@ -161,7 +172,8 @@
                         <option value="night">야간 (17:00 이후)</option>
                     </select>
                 </div>
-                <div><label class="lbl">조인 구성</label>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">조인 구성</label>
                     <select id="joinType" class="inp">
                         <option value="all">전체 (조인+4인부킹)</option>
                         <option value="join1">1인 조인</option>
@@ -170,16 +182,18 @@
                         <option value="book4">4인 단독 부킹 ★</option>
                     </select>
                 </div>
-                <div><label class="lbl">최대 거리 (송파)</label>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">최대 거리 (송파)</label>
                     <select id="maxEta" class="inp">
                         <option value="60">1시간 이내</option>
-                        <option value="90" selected>1시간 30분 이내</option>
+                        <option value="90" selected>1시간 30분 이내 (추천)</option>
                         <option value="120">2시간 이내</option>
                     </select>
                 </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-                <div><label class="lbl">최대 그린피</label>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">최대 그린피</label>
                     <select id="maxBudget" class="inp">
                         <option value="9999999">제한 없음</option>
                         <option value="150000">15만원 이하</option>
@@ -188,7 +202,8 @@
                         <option value="300000">30만원 이하</option>
                     </select>
                 </div>
-                <div><label class="lbl">지역</label>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">지역</label>
                     <select id="regionFilter" class="inp">
                         <option value="all">전체 지역</option>
                         <option value="용인">경기 용인</option>
@@ -200,14 +215,17 @@
                         <option value="춘천">강원 춘천</option>
                     </select>
                 </div>
-                <div><label class="lbl">정렬</label>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">정렬</label>
                     <select id="sortBy" class="inp">
                         <option value="price">그린피 낮은 순</option>
+                        <option value="total">총비용 낮은 순</option>
                         <option value="eta">거리 가까운 순</option>
                         <option value="time">티오프 빠른 순</option>
                     </select>
                 </div>
-                <div><label class="lbl">캐디</label>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">캐디</label>
                     <select id="caddieType" class="inp">
                         <option value="all">캐디·노캐디 전체</option>
                         <option value="caddie">캐디 동반</option>
@@ -216,10 +234,10 @@
                 </div>
             </div>
             <div class="flex items-center justify-between">
-                <p class="text-xs text-gray-500">※ 그린피 기준 최저가 정렬</p>
+                <p class="text-xs text-gray-400">※ 총비용 = 그린피 + 카트·캐디 + 톨게이트 + 유류비 (1인 기준)</p>
                 <button onclick="performSearch()" class="btn-green">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    최저가 탐색 시작
+                    최적가 탐색 시작
                 </button>
             </div>
         </div>
@@ -228,22 +246,22 @@
         <div id="pManual" class="hidden">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                 <div class="md:col-span-2">
-                    <label class="lbl">골프장명 직접 입력</label>
-                    <input type="text" id="manualCourse" placeholder="예: 남춘천CC, 사우스스프링스, 베어크리크..."
-                        class="inp" oninput="renderPlatformLinks()" onkeydown="if(event.key==='Enter') doRealSearch()">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">골프장명 직접 입력</label>
+                    <input type="text" id="manualCourse" placeholder="예: 남춘천CC, 프리스틴밸리, 베어크리크..."
+                        class="inp" oninput="renderPlatformLinks()" onkeydown="if(event.key==='Enter') openAll()">
                 </div>
                 <div>
-                    <label class="lbl">날짜</label>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5">날짜</label>
                     <input type="date" id="manualDate" class="inp" onchange="renderPlatformLinks()">
                 </div>
             </div>
 
-            <!-- 서버 연결 시: 실시간 검색 버튼 -->
-            <div id="realSearchBtn" class="hidden mb-4 flex items-center gap-3 p-3 rounded-xl" style="background:rgba(29,184,122,.08);border:1px solid rgba(29,184,122,.2)">
-                <svg class="w-5 h-5 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            <!-- 서버 연결 시 실시간 조회 버튼 -->
+            <div id="realSearchBtn" class="hidden mb-4 flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                 <div class="flex-1">
-                    <p class="text-sm font-bold text-green-300">API 서버 연결됨 — 실시간 데이터 조회 가능</p>
-                    <p class="text-xs text-gray-400">골프장명과 날짜를 입력하고 아래 버튼을 누르면 6개 플랫폼 실시간 가격을 가져옵니다.</p>
+                    <p class="text-sm font-bold text-emerald-700">API 서버 연결됨 — 실시간 데이터 조회 가능</p>
+                    <p class="text-xs text-gray-500">골프장명과 날짜 입력 후 실시간 조회 버튼을 누르세요.</p>
                 </div>
                 <button onclick="doRealSearch()" class="btn-green shrink-0">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -255,30 +273,30 @@
             <div id="platLinks" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4"></div>
 
             <div class="flex items-center justify-between">
-                <p class="text-xs text-gray-500">※ 카드 클릭 → 해당 플랫폼 실시간 잔여 티타임 확인</p>
+                <p class="text-xs text-gray-400">※ 카드 클릭 → 해당 플랫폼 공식 앱으로 이동 (SafeLink)</p>
                 <button onclick="openAll()" class="btn-gold">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     6개 전체 열기
                 </button>
             </div>
 
-            <!-- 골프장 참고 정보 패널 -->
-            <div id="courseInfo" class="hidden mt-4 rounded-xl p-4" style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2)">
-                <p class="font-bold text-sm mb-3" id="infoTitle"></p>
+            <!-- 참고 정보 패널 -->
+            <div id="courseInfo" class="hidden mt-4 info-box">
+                <p class="font-bold text-sm text-emerald-800 mb-3" id="infoTitle"></p>
                 <div id="infoGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-                <p class="text-xs text-gray-500 mt-3">※ 참고 정보 — 실제 가격·잔여는 각 플랫폼에서 확인</p>
+                <p class="text-xs text-gray-400 mt-3">※ 실측 참고값 — 실제 가격·잔여 티타임은 각 플랫폼 공식 앱에서 확인하세요</p>
             </div>
         </div>
     </section>
 
     <!-- LOADING -->
     <div id="loadArea" class="hidden">
-        <div class="panel p-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
             <div class="flex flex-col items-center gap-5">
-                <div class="spin"></div>
+                <div class="loader"></div>
                 <div class="text-center">
-                    <p id="loadTxt" class="font-semibold text-white text-sm">데이터 수집 중...</p>
-                    <p id="loadSub" class="text-xs text-gray-500 mt-1">잠시만 기다려 주세요</p>
+                    <p id="loadTxt" class="font-semibold text-gray-700 text-sm">데이터 수집 중...</p>
+                    <p id="loadSub" class="text-xs text-gray-400 mt-1">잠시만 기다려 주세요</p>
                 </div>
                 <div class="w-full max-w-sm space-y-2" id="platProgress"></div>
             </div>
@@ -288,24 +306,25 @@
     <!-- RESULTS -->
     <div id="resArea" class="hidden space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3 flex-wrap">
-                <h3 class="font-bold text-white">검색 결과 <span id="resCount" class="text-yellow-400">0</span>건</h3>
+            <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-bold text-gray-800">검색 결과 <span id="resCount" class="text-emerald-600">0</span>건</h3>
                 <div class="flex gap-1.5 flex-wrap" id="platChips">
-                    <button class="sort-tab on" data-plat="all">전체</button>
+                    <button class="chip on" data-plat="all">전체</button>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button class="sort-tab on" data-sort="price">💰 최저가</button>
-                <button class="sort-tab" data-sort="eta">📍 최단거리</button>
-                <button class="sort-tab" data-sort="time">⏰ 빠른 시간</button>
+                <button class="chip on" data-sort="price">💰 최저가</button>
+                <button class="chip" data-sort="total">🧾 총비용</button>
+                <button class="chip" data-sort="eta">📍 최단거리</button>
+                <button class="chip" data-sort="time">⏰ 빠른 시간</button>
             </div>
         </div>
 
-        <!-- 요약 stats -->
+        <!-- 요약 통계 -->
         <div class="grid grid-cols-3 gap-3">
-            <div class="panel p-3 text-center"><div class="text-xs text-gray-400 mb-1">최저 그린피</div><div class="font-black text-lg text-yellow-400" id="stMin">—</div></div>
-            <div class="panel p-3 text-center"><div class="text-xs text-gray-400 mb-1">최단 소요시간</div><div class="font-black text-lg text-green-400" id="stEta">—</div></div>
-            <div class="panel p-3 text-center"><div class="text-xs text-gray-400 mb-1">평균比 절감</div><div class="font-black text-lg text-blue-400" id="stSave">—</div></div>
+            <div class="stat-card"><div class="text-xs text-gray-400 mb-1">최저 그린피</div><div class="font-black text-lg text-emerald-600" id="stMin">—</div></div>
+            <div class="stat-card"><div class="text-xs text-gray-400 mb-1">최단 소요시간</div><div class="font-black text-lg text-blue-600" id="stEta">—</div></div>
+            <div class="stat-card"><div class="text-xs text-gray-400 mb-1">최저 총비용 (교통 포함)</div><div class="font-black text-lg text-orange-600" id="stTotal">—</div></div>
         </div>
 
         <div id="resList" class="space-y-3"></div>
@@ -313,42 +332,56 @@
 
 </main>
 
-<!-- BOOKING MODAL -->
-<div id="modal" class="fixed inset-0 hidden items-center justify-center z-50 p-4" style="background:rgba(0,0,0,.75);backdrop-filter:blur(6px)">
-    <div class="panel w-full max-w-md p-6" style="border-radius:20px">
-        <div class="flex justify-between items-center mb-5">
-            <h3 class="font-bold text-white flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(59,130,246,.2)">
-                    <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                </div>
-                AI 자동예약 에이전트
+<!-- SAFELINK MODAL (앱으로 이동) -->
+<div id="modal" class="fixed inset-0 hidden items-center justify-center z-50 p-4" style="background:rgba(0,0,0,.5)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                플랫폼 공식 앱으로 이동
             </h3>
-            <button onclick="closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-white hover:bg-opacity-5">
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <div class="rounded-xl p-4 mb-5" style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2)">
-            <p class="font-black text-white" id="mCourse"></p>
-            <p class="text-sm text-gray-400 mt-0.5" id="mDetail"></p>
-            <div class="mt-3 pt-3 flex items-center justify-between" style="border-top:1px solid rgba(201,168,76,.2)">
-                <span class="text-xs text-gray-400">그린피</span>
-                <span class="font-black text-lg text-yellow-400" id="mFee"></span>
+
+        <!-- 코스 정보 -->
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
+            <p class="font-bold text-blue-900" id="mCourse"></p>
+            <p class="text-sm text-blue-700 mt-0.5" id="mDetail"></p>
+        </div>
+
+        <!-- 비용 요약 -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-4 text-sm">
+            <div class="grid grid-cols-3 gap-2 text-center mb-2">
+                <div><div class="text-xs text-gray-400">그린피</div><div class="font-bold text-gray-800" id="mGreenFee">—</div></div>
+                <div><div class="text-xs text-gray-400">카트·캐디</div><div class="font-bold text-gray-800" id="mService">—</div></div>
+                <div><div class="text-xs text-gray-400">교통비</div><div class="font-bold text-gray-800" id="mTraffic">—</div></div>
+            </div>
+            <div class="border-t border-gray-200 pt-2 flex items-center justify-between">
+                <span class="text-xs text-gray-500 font-semibold">1인 총비용</span>
+                <span class="font-black text-lg text-gray-900" id="mTotal">—</span>
             </div>
         </div>
-        <div id="mSteps" class="space-y-3 mb-4">
-            <div class="flex items-center gap-3" id="ms1"><div class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold" style="color:#3a5070;border-color:#3a5070">1</div><div><p class="text-sm font-medium">Secure Enclave 세션 토큰 로드</p><p class="text-xs text-gray-500">암호화 인증 복호화 중</p></div><div class="ml-auto" id="mi1"></div></div>
-            <div class="flex items-center gap-3" id="ms2"><div class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold" style="color:#3a5070;border-color:#3a5070">2</div><div><p class="text-sm font-medium">플랫폼 API POST 요청</p><p class="text-xs text-gray-500">예약 요청 전송 중</p></div><div class="ml-auto" id="mi2"></div></div>
-            <div class="flex items-center gap-3" id="ms3"><div class="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold" style="color:#3a5070;border-color:#3a5070">3</div><div><p class="text-sm font-medium">예약 확정 &amp; 알림</p><p class="text-xs text-gray-500">카카오톡·이메일 발송</p></div><div class="ml-auto" id="mi3"></div></div>
+
+        <div class="text-sm text-gray-500 bg-yellow-50 border border-yellow-100 rounded-xl p-3 mb-5">
+            이용약관 준수를 위해 앱 내 직접 예약을 하지 않습니다.<br>
+            아래 버튼을 클릭하면 <strong class="text-gray-800" id="mSource"></strong> 공식 앱으로 안전하게 이동하며,
+            선택한 조인 조건이 검색에 자동 연동됩니다.
         </div>
-        <div id="mSuccess" class="hidden text-center py-4">
-            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3" style="background:rgba(29,184,122,.12);border:2px solid rgba(29,184,122,.3)">
-                <svg class="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <p class="font-black text-white text-lg">예약이 확정되었습니다!</p>
-            <p class="text-xs text-gray-400 mt-1">개인정보 즉시 폐기 완료</p>
-            <p class="text-xs text-green-400 mt-1">카카오톡 알림 발송 ✓</p>
+
+        <div id="mLinkStatus" class="hidden items-center justify-center gap-2 py-3 mb-4">
+            <div class="loader !border-t-blue-500"></div>
+            <p class="text-blue-600 text-sm font-medium">공식 앱으로 연결 중...</p>
         </div>
-        <button onclick="closeModal()" id="mCloseBtn" class="w-full mt-2 py-2.5 rounded-xl text-sm font-semibold text-gray-300 hover:text-white" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">취소</button>
+
+        <div class="flex gap-2">
+            <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition">취소</button>
+            <button onclick="executeDeepLink()" id="mDeepBtn" class="flex-1 btn-app justify-center py-2.5 rounded-xl text-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                공식 앱 열기
+            </button>
+        </div>
     </div>
 </div>
 
@@ -356,498 +389,423 @@
     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 15l7-7 7 7"/></svg>
 </button>
 
-<style>.lbl{display:block;font-size:11px;font-weight:500;color:#9ca3af;margin-bottom:6px}</style>
-
 <script>
-// ─────────────────────────────────────────────────────
-// 설정
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// 설정 & 데이터
+// ─────────────────────────────────────────
 const API = 'http://localhost:3001';
 let serverOnline = false;
 
 const PLAT = [
-    { id:'golfmon',    name:'골프몬',     cls:'b-golfmon',    url: c => `https://www.golfmon.kr/join/list?searchWord=${enc(c)}` },
-    { id:'golfpang',   name:'골팡',       cls:'b-golfpang',   url: c => `https://www.golfpang.com/web/round/booking_list.do?searchWord=${enc(c)}` },
-    { id:'smartscore', name:'스마트스코어',cls:'b-smart',      url: c => `https://www.smartscore.kr/reservation/join?keyword=${enc(c)}` },
-    { id:'kakao',      name:'카카오골프',  cls:'b-kakao',      url: c => `https://kakao.golf/search?query=${enc(c)}` },
-    { id:'greenit',    name:'그린잇',     cls:'b-greenit',    url: c => `https://www.greenit.cc/join?search=${enc(c)}` },
-    { id:'teescanner', name:'티스캐너',   cls:'b-teescanner', url: c => `https://www.teescanner.com/search?keyword=${enc(c)}` },
+    { id:'golfmon',    name:'골프몬',      cls:'b-golfmon',    url: c => `https://www.golfmon.kr/join/list?searchWord=${enc(c)}` },
+    { id:'golfpang',   name:'골팡',        cls:'b-golfpang',   url: c => `https://www.golfpang.com/web/round/booking_list.do?searchWord=${enc(c)}` },
+    { id:'smartscore', name:'스마트스코어', cls:'b-smartscore', url: c => `https://www.smartscore.kr/reservation/join?keyword=${enc(c)}` },
+    { id:'kakao',      name:'카카오골프',   cls:'b-kakao',      url: c => `https://kakao.golf/search?query=${enc(c)}` },
+    { id:'greenit',    name:'그린잇',      cls:'b-greenit',    url: c => `https://www.greenit.cc/join?search=${enc(c)}` },
+    { id:'teescanner', name:'티스캐너',    cls:'b-teescanner', url: c => `https://www.teescanner.com/search?keyword=${enc(c)}` },
 ];
 
-// 실제 주말 그린피 (2025~2026 검증값)
+// 실측 참고 DB (2025~2026)
 const COURSE_DB = {
-    // 강원 춘천
-    '남춘천':      { name:'남춘천CC',        green:'8~12만원',   tee:'06:30~14:00', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 대중제 36홀 · 빅토리·챌린지 코스' },
-    '클럽모우':    { name:'클럽모우CC',       green:'15~20만원',  tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 대중제' },
-    '엘리시안강촌':{ name:'엘리시안강촌CC',   green:'20~25만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 · 리조트 부속 대중제' },
-    '엘리시안':    { name:'엘리시안강촌CC',   green:'20~25만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 · 리조트 부속 대중제' },
-    '베어크리크춘천':{ name:'베어크리크CC 춘천',green:'25~30만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 대중제 · 프리미엄급' },
-    // 경기 용인
-    '플라자':      { name:'플라자CC 용인',    green:'28만원',     tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인 · 회원제 대중개방' },
-    '태광':        { name:'태광CC',           green:'29만원',     tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인 · 수도권 최고가급' },
-    '레이크사이드': { name:'레이크사이드CC',   green:'26만원',     tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인 대중제' },
-    '88cc':        { name:'88CC',             green:'25~27만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인/이천 대중제' },
-    // 경기 이천
-    '사우스스프링스':{ name:'사우스스프링스CC',green:'25~34만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 이천 · KLPGA 개최 · 시즌별 가격차 큼' },
-    '블루헤런':    { name:'블루헤런CC',        green:'25~30만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 이천/여주 회원제 · 비회원 예약 어려움' },
-    // 경기 여주
-    '스카이밸리':  { name:'스카이밸리CC',      green:'20~24만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 여주 대중제' },
-    '자유':        { name:'자유CC',            green:'25~30만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 여주 회원제 · 비회원 예약 제한' },
-    '신라':        { name:'신라CC',            green:'28~32만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 여주 회원제 · 비회원 매우 제한' },
-    // 경기 안성
-    '이글몬트':    { name:'이글몬트CC',        green:'25~27만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 안성 대중제' },
-    '안성q':       { name:'안성Q CC',          green:'7~15만원',   tee:'06:00~14:00', cart:'2만원',   caddie:'3만원',   note:'경기 안성 대중제 · 조조 7만원~ 성수기 15만원' },
-    // 경기 포천
-    '프리스틴밸리':{ name:'프리스틴밸리CC',   green:'19~22만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제 27홀' },
-    '프리스틴':    { name:'프리스틴밸리CC',    green:'19~22만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제 27홀' },
-    '베어크리크':  { name:'베어크리크CC 포천', green:'25~27만원',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제' },
-    '몽베르':      { name:'몽베르CC',          green:'25만원',     tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 회원제 · 비회원 25만원' },
-    '라비에벨':    { name:'라비에벨CC',        green:'21~25만원',  tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제' },
-    '아도니스':    { name:'포천아도니스CC',     green:'공홈 확인',  tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 · adoniscc.co.kr 직접 확인 필요' },
-    // 충북 충주
-    '동촌':        { name:'동촌GC',            green:'13~18만원',  tee:'06:30~14:00', cart:'2만원',   caddie:'3만원',   note:'충북 충주 대중제 · 비교적 저렴' },
-    '센테리움':    { name:'센테리움CC',         green:'15~25만원',  tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'충북 충주 대중제 · 시즌별 편차 큼' },
-    '킹스데일':    { name:'킹스데일GC',         green:'26만원',     tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'충북 충주 대중제' },
+    '남춘천':       { name:'남춘천CC',          green:'8~12만원',  tee:'06:30~14:00', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 대중제 36홀 · 빅토리·챌린지' },
+    '클럽모우':     { name:'클럽모우CC',         green:'15~20만원', tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 대중제' },
+    '엘리시안':     { name:'엘리시안강촌CC',      green:'20~25만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 리조트 부속' },
+    '베어크리크춘천':{ name:'베어크리크CC 춘천',   green:'25~30만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'강원 춘천 대중제 프리미엄' },
+    '플라자':       { name:'플라자CC 용인',       green:'28만원',    tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인 회원제 대중개방' },
+    '태광':         { name:'태광CC',             green:'29만원',    tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인 수도권 최고가급' },
+    '레이크사이드':  { name:'레이크사이드CC',      green:'26만원',    tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인 대중제' },
+    '88cc':         { name:'88CC',               green:'25~27만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 용인/이천 대중제' },
+    '사우스스프링스':{ name:'사우스스프링스CC',    green:'25~34만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 이천 KLPGA 개최 · 시즌별 편차 큼' },
+    '블루헤런':     { name:'블루헤런CC',          green:'25~30만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 이천/여주 회원제 비회원 예약 제한' },
+    '스카이밸리':   { name:'스카이밸리CC',        green:'20~24만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 여주 대중제' },
+    '자유':         { name:'자유CC',             green:'25~30만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 여주 회원제 비회원 제한' },
+    '신라':         { name:'신라CC',             green:'28~32만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 여주 회원제 비회원 매우 제한' },
+    '이글몬트':     { name:'이글몬트CC',          green:'25~27만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 안성 대중제' },
+    '안성q':        { name:'안성Q CC',           green:'7~15만원',  tee:'06:00~14:00', cart:'2만원',   caddie:'3만원',   note:'경기 안성 대중제 · 조조 7만원~' },
+    '프리스틴밸리':  { name:'프리스틴밸리CC',      green:'19~22만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제 27홀' },
+    '프리스틴':     { name:'프리스틴밸리CC',       green:'19~22만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제 27홀' },
+    '베어크리크':   { name:'베어크리크CC 포천',    green:'25~27만원', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제' },
+    '몽베르':       { name:'몽베르CC',            green:'25만원',    tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 회원제 비회원 25만원' },
+    '라비에벨':     { name:'라비에벨CC',          green:'21~25만원', tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 대중제' },
+    '아도니스':     { name:'포천아도니스CC',       green:'공홈 확인', tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'경기 포천 · adoniscc.co.kr' },
+    '동촌':         { name:'동촌GC',              green:'13~18만원', tee:'06:30~14:00', cart:'2만원',   caddie:'3만원',   note:'충북 충주 대중제 저렴' },
+    '센테리움':     { name:'센테리움CC',           green:'15~25만원', tee:'06:30~13:30', cart:'2.5만원', caddie:'3.7만원', note:'충북 충주 대중제 시즌 편차 큼' },
+    '킹스데일':     { name:'킹스데일GC',           green:'26만원',    tee:'06:30~13:00', cart:'2.5만원', caddie:'3.7만원', note:'충북 충주 대중제' },
 };
 
-// 지역별 mock 데이터 — 2025~2026 실제 주말 그린피 기준
+// 지역별 실측 그린피 & 교통비 (2025~2026)
 const REGIONS = [
-    // 용인: 28~29만원 (태광·플라자), 25~27만원 (88CC·레이크사이드)
-    { name:'용인', courses:['플라자CC 용인','88CC 용인','태광CC','레이크사이드CC'], eta:[38,55], feeMin:25, feeMax:29 },
-    // 이천: 사우스스프링스 25~34만원 (시즌별)
-    { name:'이천', courses:['사우스스프링스CC','88CC 이천','블루헤런CC','크리스탈밸리CC'],     eta:[45,65], feeMin:25, feeMax:32 },
-    // 여주: 스카이밸리 20~24만원, 신라/자유 비회원 28~32만원
-    { name:'여주', courses:['스카이밸리CC','신라CC','자유CC','엘리시안GC'],                   eta:[55,75], feeMin:20, feeMax:30 },
-    // 안성: 안성Q 7~15만원(대중제), 이글몬트 25~27만원
-    { name:'안성', courses:['이글몬트CC','안성Q CC','세인트포CC','파인힐스CC'],               eta:[58,78], feeMin:15, feeMax:27 },
-    // 포천: 라비에벨 21~25만원, 베어크리크 27만원, 몽베르 25만원, 프리스틴밸리 19~22만원
-    { name:'포천', courses:['프리스틴밸리CC','베어크리크CC 포천','몽베르CC','라비에벨CC','포천아도니스CC'], eta:[50,70], feeMin:19, feeMax:27 },
-    // 충주: 동촌 13~18만원, 센테리움 15~25만원, 킹스데일 26만원
-    { name:'충주', courses:['동촌GC','센테리움CC','킹스데일GC'],                              eta:[80,105],feeMin:13, feeMax:26 },
-    // 춘천: 남춘천 8~12만원(대중제), 클럽모우 15~20만원, 엘리시안강촌 20~25만원, 베어크리크춘천 25~30만원
-    { name:'춘천', courses:['남춘천CC','클럽모우CC','엘리시안강촌CC','베어크리크CC 춘천'],      eta:[75,100],feeMin:8,  feeMax:28 },
+    { name:'용인', courses:['플라자CC 용인','88CC 용인','태광CC','레이크사이드CC'],                    eta:[38,55],  feeMin:25, feeMax:29, toll:3500,  gas:7000  },
+    { name:'이천', courses:['사우스스프링스CC','88CC 이천','블루헤런CC','크리스탈밸리CC'],              eta:[45,65],  feeMin:25, feeMax:32, toll:4000,  gas:9500  },
+    { name:'여주', courses:['스카이밸리CC','신라CC','자유CC'],                                        eta:[55,75],  feeMin:20, feeMax:30, toll:4500,  gas:11000 },
+    { name:'안성', courses:['이글몬트CC','안성Q CC','세인트포CC'],                                    eta:[58,78],  feeMin:15, feeMax:27, toll:4800,  gas:12000 },
+    { name:'포천', courses:['프리스틴밸리CC','베어크리크CC 포천','몽베르CC','라비에벨CC','포천아도니스CC'], eta:[50,70],  feeMin:19, feeMax:27, toll:5000,  gas:13000 },
+    { name:'충주', courses:['동촌GC','센테리움CC','킹스데일GC'],                                      eta:[80,105], feeMin:13, feeMax:26, toll:6000,  gas:17000 },
+    { name:'춘천', courses:['남춘천CC','클럽모우CC','엘리시안강촌CC','베어크리크CC 춘천'],               eta:[75,100], feeMin:8,  feeMax:28, toll:5800,  gas:16000 },
 ];
+
 const JOIN_TYPES = [
-    {label:'1인 조인',cls:'j1',pax:1,key:'join1'},
-    {label:'2인 조인',cls:'j2',pax:2,key:'join2'},
-    {label:'3인 조인',cls:'j3',pax:3,key:'join3'},
-    {label:'4인 단독부킹',cls:'j4',pax:4,key:'book4'},
+    {label:'1인 조인',cls:'j1',key:'join1'},
+    {label:'2인 조인',cls:'j2',key:'join2'},
+    {label:'3인 조인',cls:'j3',key:'join3'},
+    {label:'4인 단독부킹',cls:'j4',key:'book4'},
 ];
 const TIMES = {
-    dawn:[['05','30'],['05','45'],['06','00'],['06','15']],
-    morning:[['07','00'],['07','15'],['07','30'],['07','45'],['08','00'],['08','15'],['08','30'],['08','45'],['09','00'],['09','15']],
-    midday:[['09','30'],['10','00'],['10','30'],['11','00'],['11','30']],
+    dawn:     [['05','30'],['05','45'],['06','00'],['06','15']],
+    morning:  [['07','00'],['07','15'],['07','30'],['07','45'],['08','00'],['08','15'],['08','30'],['08','45'],['09','00']],
+    midday:   [['09','30'],['10','00'],['10','30'],['11','00'],['11','30']],
     afternoon:[['12','00'],['12','30'],['13','00'],['13','30'],['14','00']],
-    night:[['17','00'],['17','30'],['18','00'],['18','30'],['19','00']],
+    night:    [['17','00'],['17','30'],['18','00'],['18','30'],['19','00']],
 };
 
+const PLAT_COLORS = ['bg-blue-400','bg-purple-400','bg-yellow-400','bg-amber-400','bg-emerald-400','bg-red-400'];
 let allResults=[], activeFilter='all', activeSort='price';
 function enc(s){return encodeURIComponent(s)}
 
-// ─────────────────────────────────────────────────────
-// 서버 상태 확인 (5초마다)
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// 서버 상태 체크
+// ─────────────────────────────────────────
 async function checkServer() {
     try {
-        const r = await fetch(`${API}/health`, {signal: AbortSignal.timeout(2000)});
+        const r = await fetch(`${API}/health`, {signal:AbortSignal.timeout(2000)});
         serverOnline = r.ok;
     } catch { serverOnline = false; }
-
-    const badge = document.getElementById('srvBadge');
-    const dot   = document.getElementById('srvDot');
-    const txt   = document.getElementById('srvTxt');
-    const btn   = document.getElementById('realSearchBtn');
-    const notice= document.getElementById('noticeBanner');
-
+    const badge=document.getElementById('srvBadge'), dot=document.getElementById('srvDot'), txt=document.getElementById('srvTxt');
+    const btn=document.getElementById('realSearchBtn');
     if (serverOnline) {
-        badge.className = 'srv-on text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5';
-        dot.className   = 'w-2 h-2 rounded-full bg-green-400 animate-pulse';
-        txt.innerText   = '실시간 연결됨';
+        badge.className='srv-on text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5';
+        dot.className='w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block';
+        txt.innerText='실시간 연결됨';
         btn?.classList.remove('hidden');
-        notice?.classList.add('hidden');
     } else {
-        badge.className = 'srv-off text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5';
-        dot.className   = 'w-2 h-2 rounded-full bg-red-400';
-        txt.innerText   = '서버 미연결';
+        badge.className='srv-off text-xs px-3 py-1 rounded-full font-semibold flex items-center gap-1.5';
+        dot.className='w-2 h-2 rounded-full bg-red-400 inline-block';
+        txt.innerText='서버 미연결';
         btn?.classList.add('hidden');
-        notice?.classList.remove('hidden');
     }
 }
 
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // 탭 전환
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 function switchTab(t) {
-    const isAuto = t === 'auto';
-    document.getElementById('pAuto').classList.toggle('hidden', !isAuto);
-    document.getElementById('pManual').classList.toggle('hidden', isAuto);
-    document.getElementById('tabAuto').className   = isAuto ? 'tab-on'  : 'tab-off';
-    document.getElementById('tabManual').className = isAuto ? 'tab-off' : 'tab-on';
-    if (!isAuto) renderPlatformLinks();
+    const isAuto = t==='auto';
+    document.getElementById('pAuto').classList.toggle('hidden',!isAuto);
+    document.getElementById('pManual').classList.toggle('hidden',isAuto);
+    document.getElementById('tabAuto').className  = isAuto ? 'tab-on' : 'tab-off';
+    document.getElementById('tabManual').className= isAuto ? 'tab-off': 'tab-on';
+    if(!isAuto) renderPlatformLinks();
 }
 
-// ─────────────────────────────────────────────────────
-// 직접 검색: 플랫폼 링크 렌더링
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// 직접검색: 플랫폼 링크
+// ─────────────────────────────────────────
 function renderPlatformLinks() {
     const course = document.getElementById('manualCourse').value.trim();
-    const date   = document.getElementById('manualDate').value;
-    const container = document.getElementById('platLinks');
-
-    container.innerHTML = PLAT.map(p => `
-        <a href="${p.url(course || '골프장')}" target="_blank" rel="noopener" class="plink">
+    document.getElementById('platLinks').innerHTML = PLAT.map(p => `
+        <a href="${p.url(course||'골프장')}" target="_blank" rel="noopener" class="plink">
             <div class="flex items-center justify-between">
                 <span class="${p.cls} text-xs font-bold px-2 py-0.5 rounded-md">${p.name}</span>
-                <svg class="w-3 h-3 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             </div>
-            <div class="text-xs py-1.5 text-center rounded-lg mt-1" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#c0d0e0">
+            <div class="text-xs text-center py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 font-medium">
                 ${course ? `"${course}" 검색` : '클릭하여 검색'}
             </div>
         </a>`).join('');
 
-    // 참고 정보
-    const key = course ? Object.keys(COURSE_DB).find(k => course.includes(k)) : null;
+    const key = course ? Object.keys(COURSE_DB).find(k=>course.toLowerCase().includes(k)) : null;
     const info = key ? COURSE_DB[key] : null;
     const panel = document.getElementById('courseInfo');
     if (info) {
-        document.getElementById('infoTitle').innerText = '⛳ ' + info.name + ' — 참고 정보';
+        document.getElementById('infoTitle').innerText = '⛳ ' + info.name + ' — 실측 참고 정보';
         document.getElementById('infoGrid').innerHTML = `
-            <div class="istat"><div class="lbl">주말 그린피</div><div class="val" style="color:var(--gold)">${info.green}</div></div>
-            <div class="istat"><div class="lbl">티오프 시간</div><div class="val text-white" style="font-size:12px">${info.tee}</div></div>
-            <div class="istat"><div class="lbl">카트비 (1인)</div><div class="val text-blue-400">${info.cart}</div></div>
-            <div class="istat"><div class="lbl">캐디피 (1인)</div><div class="val text-purple-400">${info.caddie}</div></div>
-            <div class="istat col-span-2 md:col-span-4" style="text-align:left"><div class="lbl">코스 정보</div><div class="val text-gray-300" style="font-size:13px">${info.note}</div></div>`;
+            <div class="info-stat"><div class="lbl">주말 그린피</div><div class="val text-emerald-700">${info.green}</div></div>
+            <div class="info-stat"><div class="lbl">티오프 시간</div><div class="val text-gray-700" style="font-size:12px">${info.tee}</div></div>
+            <div class="info-stat"><div class="lbl">카트비 (1인)</div><div class="val text-blue-600">${info.cart}</div></div>
+            <div class="info-stat"><div class="lbl">캐디피 (1인)</div><div class="val text-purple-600">${info.caddie}</div></div>
+            <div class="info-stat col-span-2 md:col-span-4" style="text-align:left"><div class="lbl">코스 정보</div><div class="val text-gray-600" style="font-size:13px">${info.note}</div></div>`;
         panel.classList.remove('hidden');
-    } else {
-        panel.classList.add('hidden');
-    }
+    } else { panel.classList.add('hidden'); }
 }
 
 function openAll() {
     const course = document.getElementById('manualCourse').value.trim();
-    const date   = document.getElementById('manualDate').value;
-    if (!course) { alert('골프장명을 입력해주세요.'); return; }
-
-    // 링크 모달 생성 — 팝업 차단 완전 우회
-    const existing = document.getElementById('openAllModal');
-    if (existing) existing.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'openAllModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
-    modal.innerHTML = `
-      <div style="background:#192231;border:1px solid #2a3a4a;border-radius:20px;padding:24px;width:100%;max-width:480px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-          <p style="font-size:15px;font-weight:800;color:#fff">⛳ ${course} — 플랫폼 선택</p>
-          <button onclick="document.getElementById('openAllModal').remove()"
-            style="background:rgba(255,255,255,.08);border:1px solid #2a3a4a;color:#9ca3af;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:13px">닫기</button>
+    if(!course){alert('골프장명을 입력해주세요.');return;}
+    const existing=document.getElementById('openAllModal');
+    if(existing)existing.remove();
+    const modal=document.createElement('div');
+    modal.id='openAllModal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+    modal.innerHTML=`
+      <div style="background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <p style="font-size:15px;font-weight:800;color:#065f46">⛳ ${course} — 플랫폼 선택</p>
+          <button onclick="document.getElementById('openAllModal').remove()" style="background:#f3f4f6;border:none;color:#6b7280;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:13px">닫기</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          ${PLAT.map(p => `
+          ${PLAT.map(p=>`
             <a href="${p.url(course)}" target="_blank" rel="noopener"
               onclick="document.getElementById('openAllModal').remove()"
-              style="display:flex;align-items:center;gap:10px;background:#0f1923;border:1px solid #2a3a4a;border-radius:12px;padding:14px;text-decoration:none;transition:.15s"
-              onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#2a3a4a'">
+              style="display:flex;align-items:center;gap:10px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none;transition:.15s"
+              onmouseover="this.style.borderColor='#6ee7b7';this.style.background='#f0fdf4'"
+              onmouseout="this.style.borderColor='#e5e7eb';this.style.background='#f9fafb'">
               <span class="${p.cls}" style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px">${p.name}</span>
-              <svg style="width:14px;height:14px;color:#4a6070;flex-shrink:0;margin-left:auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-              </svg>
+              <svg style="width:14px;height:14px;color:#9ca3af;margin-left:auto;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             </a>`).join('')}
         </div>
-        <p style="font-size:11px;color:#4a6070;text-align:center;margin-top:14px">각 플랫폼에서 로그인 후 "${course}" 검색 → 6/13 잔여 티타임 확인</p>
+        <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:12px">각 플랫폼 공식 앱으로 이동 · SafeLink</p>
       </div>`;
     document.body.appendChild(modal);
-    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
 }
 
-// ─────────────────────────────────────────────────────
-// 실시간 API 검색 (서버 연결 시)
-// ─────────────────────────────────────────────────────
 async function doRealSearch() {
-    const course = document.getElementById('manualCourse').value.trim();
-    const date   = document.getElementById('manualDate').value;
-    if (!course) { alert('골프장명을 입력해주세요.'); return; }
-    if (!date)   { alert('날짜를 선택해주세요.'); return; }
-    if (!serverOnline) { alert('API 서버가 실행 중이 아닙니다.\ngolf-api\\시작.bat 를 먼저 실행해주세요.'); return; }
-
-    showLoading(true, true);
-
+    const course=document.getElementById('manualCourse').value.trim();
+    const date=document.getElementById('manualDate').value;
+    if(!course){alert('골프장명을 입력해주세요.');return;}
+    if(!date){alert('날짜를 선택해주세요.');return;}
+    if(!serverOnline){alert('API 서버를 먼저 실행하세요.\ngolf-api\\시작.bat');return;}
+    showLoading(true,true);
     try {
-        const res  = await fetch(`${API}/api/search?course=${enc(course)}&date=${date}`);
-        const data = await res.json();
-
+        const res=await fetch(`${API}/api/search?course=${enc(course)}&date=${date}`);
+        const data=await res.json();
         showLoading(false);
-
-        if (data.error) { alert('오류: ' + data.error); return; }
-
-        if (data.results.length === 0) {
-            allResults = [];
-            document.getElementById('resList').innerHTML = `
-                <div class="panel p-10 text-center text-gray-500">
-                    <p class="text-3xl mb-3">🔍</p>
-                    <p class="font-semibold">실시간 결과가 없습니다</p>
-                    <p class="text-sm mt-1">아래 플랫폼 링크를 직접 확인해보세요</p>
-                </div>`;
-            document.getElementById('resCount').innerText = 0;
+        if(data.results?.length>0){
+            allResults=data.results;
+            buildChips();
+            renderResults(sortData([...allResults]));
+            document.getElementById('resArea').classList.remove('hidden');
+            document.getElementById('resArea').scrollIntoView({behavior:'smooth'});
         } else {
-            allResults = data.results.map(item => ({
-                ...item,
-                source: item.platform,
-                greenFee: item.feeParsed || 0,
-                totalCost: item.feeParsed || 0,
-                eta: 80, // 실제 ETA는 추후 카카오내비 API 연동
-                joinLabel: item.joinType || '정보 없음',
-                joinCls: 'j2',
-                hasCaddie: true,
-                region: course,
-                sourceBadge: PLAT.find(p => p.name === item.platform)?.cls || 'b-golfmon',
-            }));
-            renderResults(allResults);
+            document.getElementById('resList').innerHTML=`<div class="bg-white rounded-xl border border-gray-100 p-10 text-center text-gray-400"><p class="text-2xl mb-2">🔍</p><p>실시간 결과 없음 — 플랫폼 링크를 직접 확인하세요</p></div>`;
+            document.getElementById('resArea').classList.remove('hidden');
         }
-
-        // 플랫폼별 결과 수 표시
-        updatePlatformChips(data.platforms || []);
-        document.getElementById('resArea').classList.remove('hidden');
-        document.getElementById('resArea').scrollIntoView({ behavior:'smooth' });
-
-    } catch(e) {
-        showLoading(false);
-        alert('API 오류: ' + e.message);
-    }
+    } catch(e){showLoading(false);alert('API 오류: '+e.message);}
 }
 
-// ─────────────────────────────────────────────────────
-// 자동 탐색 (Mock)
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// 자동 탐색 (Mock — 실측 데이터 기반)
+// ─────────────────────────────────────────
 function generateMock() {
-    const maxEta    = parseInt(document.getElementById('maxEta').value);
-    const joinFilter= document.getElementById('joinType').value;
-    const maxBudget = parseInt(document.getElementById('maxBudget').value);
-    const regionFilter = document.getElementById('regionFilter').value;
-    const caddieFilter = document.getElementById('caddieType').value;
-    const timeSlot  = document.getElementById('searchTime').value;
-    const results   = [];
+    const maxEta=parseInt(document.getElementById('maxEta').value);
+    const joinFilter=document.getElementById('joinType').value;
+    const maxBudget=parseInt(document.getElementById('maxBudget').value);
+    const regionFilter=document.getElementById('regionFilter').value;
+    const caddieFilter=document.getElementById('caddieType').value;
+    const timeSlot=document.getElementById('searchTime').value;
+    const results=[];
+    for(let i=0;i<60;i++){
+        const region=REGIONS[Math.floor(Math.random()*REGIONS.length)];
+        if(regionFilter!=='all'&&region.name!==regionFilter) continue;
+        const eta=Math.floor(Math.random()*(region.eta[1]-region.eta[0]))+region.eta[0];
+        if(eta>maxEta) continue;
+        const plat=PLAT[Math.floor(Math.random()*PLAT.length)];
+        const course=region.courses[Math.floor(Math.random()*region.courses.length)];
+        const jKey=joinFilter==='all'?['join1','join2','join3','book4'][Math.floor(Math.random()*4)]:joinFilter;
+        const jDef=JOIN_TYPES.find(j=>j.key===jKey);
+        const times=TIMES[timeSlot]||TIMES.morning;
+        const t=times[Math.floor(Math.random()*times.length)];
+        const hasCaddie=Math.random()>0.3;
+        if(caddieFilter==='caddie'&&!hasCaddie) continue;
+        if(caddieFilter==='no'&&hasCaddie) continue;
 
-    for (let i = 0; i < 50; i++) {
-        const region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
-        if (regionFilter !== 'all' && region.name !== regionFilter) continue;
-        const eta = Math.floor(Math.random() * (region.eta[1]-region.eta[0])) + region.eta[0];
-        if (eta > maxEta) continue;
+        const greenFee=(Math.floor(Math.random()*(region.feeMax-region.feeMin+1))+region.feeMin)*10000;
+        if(greenFee>maxBudget) continue;
 
-        const plat   = PLAT[Math.floor(Math.random() * PLAT.length)];
-        const course = region.courses[Math.floor(Math.random() * region.courses.length)];
-        const jKey   = joinFilter === 'all'
-            ? ['join1','join2','join3','book4'][Math.floor(Math.random()*4)]
-            : joinFilter;
-        const jDef   = JOIN_TYPES.find(j=>j.key===jKey);
-        const times  = TIMES[timeSlot] || TIMES.morning;
-        const t      = times[Math.floor(Math.random()*times.length)];
-        const hasCaddie = Math.random() > 0.3;
-        if (caddieFilter === 'caddie' && !hasCaddie) continue;
-        if (caddieFilter === 'no'     &&  hasCaddie) continue;
-
-        const greenFee = (Math.floor(Math.random()*(region.feeMax-region.feeMin+1))+region.feeMin)*10000;
-        if (greenFee > maxBudget) continue;
+        // 카트비 + 캐디비 (1인 기준)
+        const cartPer = Math.round((90000+Math.random()*30000)/4);
+        const caddiePer = hasCaddie ? Math.round((130000+Math.random()*20000)/4) : 0;
+        const trafficCost = region.toll + region.gas;
+        const totalCost = greenFee + cartPer + caddiePer + trafficCost;
 
         results.push({
-            region: region.name, course, time: `${t[0]}:${t[1]}`, eta,
-            source: plat.name, sourceBadge: plat.cls,
-            greenFee, totalCost: greenFee,
-            hasCaddie, joinLabel: jDef.label, joinCls: jDef.cls, joinKey: jKey, pax: jDef.pax,
+            region:region.name, course, time:`${t[0]}:${t[1]}`, eta,
+            source:plat.name, sourceCls:plat.cls, platUrl:plat.url(course),
+            greenFee, cartPer, caddiePer, hasCaddie, toll:region.toll, gas:region.gas, totalCost,
+            joinLabel:jDef.label, joinCls:jDef.cls, joinKey:jKey,
         });
-        if (results.length >= 15) break;
+        if(results.length>=15) break;
     }
     return results;
 }
 
 function performSearch() {
-    const date = document.getElementById('searchDate').value;
-    if (!date) { alert('날짜를 선택해주세요.'); return; }
-
+    const date=document.getElementById('searchDate').value;
+    if(!date){alert('날짜를 선택해주세요.');return;}
     document.getElementById('resArea').classList.add('hidden');
-    showLoading(true, false);
-
-    const msgs = [
-        ['골프몬·골팡 실시간 조인 수집 중...','비동기 스캔'],
+    showLoading(true,false);
+    const msgs=[
+        ['골프몬·골팡 조인 데이터 수집 중...','비동기 스캔'],
         ['스마트스코어·카카오골프 조회 중...','300+ 골프장 확인'],
-        ['그린잇·티스캐너 병합 중...','370개 비교'],
+        ['그린잇·티스캐너 데이터 병합 중...','370개 비교'],
         ['카카오내비 ETA 산출 중...','송파 기점 교통 반영'],
-        ['최저가 정렬 완료...','6개 플랫폼 완료'],
+        ['총비용 계산 및 최저가 정렬 중...','6개 플랫폼 완료'],
     ];
     let idx=0;
-    const timer = setInterval(() => {
-        idx = Math.min(idx+1, msgs.length-1);
-        document.getElementById('loadTxt').innerText = msgs[idx][0];
-        document.getElementById('loadSub').innerText = msgs[idx][1];
-    }, 600);
-
-    setTimeout(() => {
+    const timer=setInterval(()=>{
+        idx=Math.min(idx+1,msgs.length-1);
+        document.getElementById('loadTxt').innerText=msgs[idx][0];
+        document.getElementById('loadSub').innerText=msgs[idx][1];
+    },620);
+    setTimeout(()=>{
         clearInterval(timer);
         showLoading(false);
-        allResults = generateMock();
-        activeFilter = 'all'; activeSort = 'price';
-        buildPlatChips();
+        allResults=generateMock();
+        activeFilter='all'; activeSort='price';
+        buildChips();
         renderResults(sortData([...allResults]));
         document.getElementById('resArea').classList.remove('hidden');
         document.getElementById('resArea').scrollIntoView({behavior:'smooth'});
-    }, 3200);
+    },3200);
 }
 
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // 로딩 UI
-// ─────────────────────────────────────────────────────
-const PLAT_COLORS = ['bg-blue-400','bg-purple-400','bg-yellow-400','bg-yellow-300','bg-green-400','bg-red-400'];
-
+// ─────────────────────────────────────────
 function showLoading(on, isReal=false) {
-    const el = document.getElementById('loadArea');
-    if (!on) { el.classList.add('hidden'); return; }
+    const el=document.getElementById('loadArea');
+    if(!on){el.classList.add('hidden');return;}
     el.classList.remove('hidden');
-
-    const prog = document.getElementById('platProgress');
-    prog.innerHTML = PLAT.map((p,i) => `
-        <div class="plat-row">
-            <span class="${p.cls} text-xs font-bold px-2 py-0.5 rounded w-28 text-center">${p.name}</span>
-            <div class="plat-bar-bg"><div class="plat-bar ${PLAT_COLORS[i]}" id="pb${i}" style="width:0%"></div></div>
-            <span class="plat-pct" id="pp${i}">0%</span>
-            <span class="plat-status" id="ps${i}">⏳</span>
+    const prog=document.getElementById('platProgress');
+    prog.innerHTML=PLAT.map((p,i)=>`
+        <div class="flex items-center gap-3 text-xs">
+            <span class="${p.cls} font-bold px-2 py-0.5 rounded text-xs w-28 text-center">${p.name}</span>
+            <div class="prog-bg flex-1 overflow-hidden"><div class="prog-fill ${PLAT_COLORS[i]}" id="pb${i}" style="width:0%"></div></div>
+            <span class="text-gray-400 w-8 text-right" id="pp${i}">0%</span>
         </div>`).join('');
-
-    if (isReal) {
-        document.getElementById('loadTxt').innerText = '실시간 데이터 수집 중...';
-        document.getElementById('loadSub').innerText = '골프장 페이지 직접 접속 중';
-        // 실제 스크래핑 진행 시뮬레이션
-        PLAT.forEach((_, i) => {
-            const speed = 300 + i * 400;
-            let pct = 0;
-            const iv = setInterval(() => {
-                pct = Math.min(pct + Math.random()*15, 95);
-                const b = document.getElementById(`pb${i}`);
-                const p = document.getElementById(`pp${i}`);
-                if (b) b.style.width = pct + '%';
-                if (p) p.innerText = Math.round(pct) + '%';
-            }, speed);
-            setTimeout(() => clearInterval(iv), 12000);
-        });
-    } else {
-        document.getElementById('loadTxt').innerText = '데이터 수집 중...';
-        document.getElementById('loadSub').innerText = '잠시만 기다려 주세요';
-        const tgts = [100,87,94,78,91,83];
-        let st=null; const dur=2800;
-        function anim(ts) {
+    document.getElementById('loadTxt').innerText=isReal?'실시간 데이터 수집 중...':'데이터 수집 중...';
+    document.getElementById('loadSub').innerText=isReal?'플랫폼 직접 접속 중':'잠시만 기다려 주세요';
+    if(!isReal){
+        const tgts=[100,87,94,78,91,83];
+        let st=null;
+        function anim(ts){
             if(!st)st=ts;
-            const prog2=Math.min((ts-st)/dur,1);
-            const ease=1-Math.pow(1-prog2,2);
-            PLAT.forEach((_,i)=>{
-                const pct=Math.floor(ease*tgts[i]);
-                const b=document.getElementById(`pb${i}`);
-                const p=document.getElementById(`pp${i}`);
-                if(b)b.style.width=pct+'%';
-                if(p)p.innerText=pct+'%';
-            });
-            if(prog2<1) requestAnimationFrame(anim);
+            const p=Math.min((ts-st)/2800,1);
+            const e=1-Math.pow(1-p,2);
+            PLAT.forEach((_,i)=>{const pct=Math.floor(e*tgts[i]);const b=document.getElementById(`pb${i}`);const pp=document.getElementById(`pp${i}`);if(b)b.style.width=pct+'%';if(pp)pp.innerText=pct+'%';});
+            if(p<1)requestAnimationFrame(anim);
         }
         requestAnimationFrame(anim);
+    } else {
+        PLAT.forEach((_,i)=>{
+            let pct=0;
+            const iv=setInterval(()=>{pct=Math.min(pct+Math.random()*12,90);const b=document.getElementById(`pb${i}`);const pp=document.getElementById(`pp${i}`);if(b)b.style.width=pct+'%';if(pp)pp.innerText=Math.round(pct)+'%';},300+i*200);
+            setTimeout(()=>clearInterval(iv),15000);
+        });
     }
 }
 
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // 결과 렌더링
-// ─────────────────────────────────────────────────────
-function buildPlatChips() {
-    const sources = [...new Set(allResults.map(r=>r.source))];
-    const chips = document.getElementById('platChips');
-    chips.innerHTML = `<button class="sort-tab on" data-plat="all" onclick="filterPlat('all',this)">전체</button>`
-        + sources.map(s => {
-            const p = PLAT.find(x=>x.name===s);
-            return `<button class="sort-tab" data-plat="${s}" onclick="filterPlat('${s}',this)">${s}</button>`;
-        }).join('');
+// ─────────────────────────────────────────
+function buildChips() {
+    const sources=[...new Set(allResults.map(r=>r.source||r.platform))];
+    const chips=document.getElementById('platChips');
+    chips.innerHTML=`<button class="chip on" data-plat="all" onclick="filterPlat('all',this)">전체</button>`
+        +sources.map(s=>`<button class="chip" data-plat="${s}" onclick="filterPlat('${s}',this)">${s}</button>`).join('');
 }
-
-function updatePlatformChips(platforms) {
-    const chips = document.getElementById('platChips');
-    chips.innerHTML = `<button class="sort-tab on" onclick="filterPlat('all',this)">전체</button>`
-        + platforms.map(p => `<button class="sort-tab" onclick="filterPlat('${p.id}',this)">${p.name||p.id} (${p.count})</button>`).join('');
-}
-
-function filterPlat(plat, el) {
-    document.querySelectorAll('#platChips .sort-tab').forEach(b=>b.classList.remove('on'));
+function filterPlat(plat,el){
+    document.querySelectorAll('#platChips .chip').forEach(c=>c.classList.remove('on'));
     el.classList.add('on');
-    activeFilter = plat;
-    const filtered = plat==='all' ? allResults : allResults.filter(r=>r.source===plat||r.platform===plat);
-    renderResults(sortData(filtered));
-    document.getElementById('resCount').innerText = filtered.length;
+    activeFilter=plat;
+    const f=plat==='all'?allResults:allResults.filter(r=>(r.source||r.platform)===plat);
+    renderResults(sortData(f));
+    document.getElementById('resCount').innerText=f.length;
 }
-
-function sortData(data) {
-    if(activeSort==='price') return data.sort((a,b)=>a.totalCost-b.totalCost);
+function sortData(data){
+    if(activeSort==='price') return data.sort((a,b)=>a.greenFee-b.greenFee);
+    if(activeSort==='total') return data.sort((a,b)=>a.totalCost-b.totalCost);
     if(activeSort==='eta')   return data.sort((a,b)=>a.eta-b.eta);
     if(activeSort==='time')  return data.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
     return data;
 }
+document.addEventListener('click',e=>{
+    const btn=e.target.closest('[data-sort]');
+    if(!btn)return;
+    document.querySelectorAll('[data-sort]').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    activeSort=btn.dataset.sort;
+    renderResults(sortData([...allResults]));
+});
 
-function renderResults(data) {
-    const list = document.getElementById('resList');
-    list.innerHTML = '';
-
-    if (!data.length) {
-        list.innerHTML = `<div class="panel p-10 text-center text-gray-500"><p class="text-3xl mb-2">🔍</p><p class="font-semibold">결과 없음</p><p class="text-sm mt-1">필터를 완화하거나 다른 골프장을 검색해보세요</p></div>`;
+function renderResults(data){
+    const list=document.getElementById('resList');
+    list.innerHTML='';
+    if(!data.length){
+        list.innerHTML=`<div class="bg-white rounded-xl border border-gray-100 p-10 text-center text-gray-400"><p class="text-3xl mb-2">🔍</p><p class="font-semibold">결과가 없습니다</p><p class="text-sm mt-1">필터 조건을 완화해 보세요</p></div>`;
         return;
     }
+    const minFee=Math.min(...data.map(d=>d.greenFee||0));
+    const minTotal=Math.min(...data.map(d=>d.totalCost||0));
+    const maxFee=Math.max(...data.map(d=>d.greenFee||0));
+    document.getElementById('stMin').innerText=formatW(minFee);
+    document.getElementById('stEta').innerText=Math.min(...data.map(d=>d.eta||99))+'분';
+    document.getElementById('stTotal').innerText=formatW(minTotal);
+    document.getElementById('resCount').innerText=data.length;
 
-    const maxC = Math.max(...data.map(d=>d.totalCost||0));
-    const minC = Math.min(...data.map(d=>d.totalCost||0));
+    data.forEach((item,idx)=>{
+        const isBest=idx===0;
+        const delay=Math.min(idx*50,350);
+        const barW=maxFee>minFee?Math.round((1-(item.greenFee-minFee)/(maxFee-minFee))*100):100;
+        const etaClr=!item.eta?'#9ca3af':item.eta<=55?'#059669':item.eta<=75?'#d97706':'#dc2626';
+        const diffFee=idx>0?(item.greenFee-data[0].greenFee):0;
 
-    // 통계 업데이트
-    document.getElementById('stMin').innerText  = formatW(minC);
-    document.getElementById('stEta').innerText  = Math.min(...data.map(d=>d.eta||99)) + '분';
-    const avg = data.reduce((a,b)=>a+(b.totalCost||0),0)/data.length;
-    document.getElementById('stSave').innerText = '평균比 ' + formatW(Math.round(avg-minC)) + ' ↓';
-    document.getElementById('resCount').innerText = data.length;
-
-    data.forEach((item, idx) => {
-        const isBest = idx===0;
-        const delay  = Math.min(idx*55, 380);
-        const barW   = maxC>minC ? Math.round((1-(item.totalCost-minC)/(maxC-minC))*100) : 100;
-        const etaClr = !item.eta ? '#9ca3af' : item.eta<=55 ? '#4ade80' : item.eta<=75 ? '#facc15' : '#fb923c';
-        const diff   = idx>0 ? (item.totalCost||0)-(data[0].totalCost||0) : 0;
-        const platCls= PLAT.find(p=>p.name===(item.source||item.platform))?.cls || 'b-golfmon';
-
-        list.insertAdjacentHTML('beforeend', `
-<div class="rcard fade-up ${isBest?'best':''}" style="animation-delay:${delay}ms">
+        list.insertAdjacentHTML('beforeend',`
+<div class="card p-5 fade-in ${isBest?'best':''}" style="animation-delay:${delay}ms">
     ${isBest?`<div class="flex items-center gap-2 mb-3">
-        <span style="background:linear-gradient(135deg,#c9a84c,#a07830);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">★ AI 최저가 추천</span>
-        <span class="text-xs text-gray-500">6개 플랫폼 종합 1위</span>
+        <span class="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            AI 최적가 추천
+        </span>
+        <span class="text-xs text-gray-400">6개 플랫폼 종합 1위</span>
     </div>`:''}
+
     <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2 mb-2">
-                <span class="${platCls} text-xs font-bold px-2.5 py-1 rounded-lg">${item.source||item.platform||'플랫폼'}</span>
-                ${item.region?`<span class="text-xs font-semibold px-2 py-0.5 rounded" style="background:rgba(255,255,255,.06);color:#7a8fa0">${item.region}</span>`:''}
+                <span class="${item.sourceCls||'b-golfmon'} text-xs font-bold px-2.5 py-1 rounded-lg">${item.source||item.platform||'플랫폼'}</span>
+                ${item.region?`<span class="text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-500">${item.region}</span>`:''}
                 ${item.joinLabel?`<span class="text-xs px-2 py-0.5 rounded-full font-semibold ${item.joinCls||'j2'}">${item.joinLabel}</span>`:''}
-                ${item.hasCaddie===false?`<span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,.05);color:#7a8fa0;border:1px solid rgba(255,255,255,.1)">노캐디</span>`:''}
+                ${item.hasCaddie===false?`<span class="text-xs px-2 py-0.5 rounded-full bg-gray-50 text-gray-400 border border-gray-200">노캐디</span>`:''}
             </div>
+
             <div class="flex items-baseline gap-2 mb-2">
-                <h4 class="text-lg font-black text-white truncate">${item.course||'골프장'}</h4>
-                ${item.time?`<span class="text-sm font-medium shrink-0" style="color:var(--gold)">${item.time} 티오프</span>`:''}
+                <h4 class="text-xl font-black text-gray-900 truncate">${item.course||'골프장'}</h4>
+                ${item.time?`<span class="text-sm font-bold text-emerald-600 shrink-0">${item.time} 티오프</span>`:''}
             </div>
-            <div class="flex flex-wrap gap-4 text-sm text-gray-400 mb-3">
-                ${item.eta?`<span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>송파 <strong style="color:${etaClr}">${item.eta}분</strong></span>`:''}
-                ${item.greenFee?`<span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>그린피 <span class="text-gray-300">${formatW(item.greenFee)}</span></span>`:''}
+
+            <!-- 비용 내역 -->
+            <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-3">
+                ${item.eta?`<span class="flex items-center gap-1"><svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>송파 출발 <strong style="color:${etaClr}">${item.eta}분</strong></span>`:''}
+                ${item.greenFee?`<span>그린피 <strong class="text-gray-700">${formatW(item.greenFee)}</strong></span>`:''}
+                ${item.cartPer?`<span>카트 <strong class="text-gray-700">${formatW(item.cartPer)}</strong></span>`:''}
+                ${item.caddiePer?`<span>캐디 <strong class="text-gray-700">${formatW(item.caddiePer)}</strong></span>`:''}
+                ${(item.toll&&item.gas)?`<span>교통 <strong class="text-gray-700">${formatW(item.toll+item.gas)}</strong></span>`:''}
             </div>
+
             <div>
-                <div class="flex justify-between text-xs text-gray-500 mb-1"><span>비용 효율</span><span>${barW}점</span></div>
-                <div style="background:#1a2a3a;border-radius:3px;height:5px"><div class="cmp-bar" style="width:${barW}%"></div></div>
+                <div class="flex justify-between text-xs text-gray-400 mb-1"><span>비용 효율</span><span>${barW}점</span></div>
+                <div class="prog-bg w-full"><div class="cmp-bar" style="width:${barW}%"></div></div>
             </div>
         </div>
-        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-3 md:pl-5 md:border-l border-t md:border-t-0 pt-3 md:pt-0" style="border-color:var(--border);min-width:160px">
+
+        <!-- 가격 + 버튼 -->
+        <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-3 border-t md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-5" style="min-width:170px">
             <div class="text-right">
-                <p class="text-xs text-gray-500 mb-0.5">그린피</p>
-                <p class="font-black text-white" style="font-size:24px;letter-spacing:-.5px">${formatW(item.totalCost||item.greenFee)}</p>
-                ${diff>0?`<p class="text-xs mt-1" style="color:#f87171">최저比 +${formatW(diff)}</p>`:`<p class="text-xs mt-1 text-green-400">✓ 최저가</p>`}
+                <p class="text-xs text-gray-400 mb-0.5">그린피</p>
+                <p class="font-black text-gray-900" style="font-size:24px;letter-spacing:-.5px">${formatW(item.greenFee)}</p>
+                <p class="text-xs text-gray-400 mt-0.5">총비용 <span class="font-semibold text-gray-600">${formatW(item.totalCost)}</span></p>
+                ${diffFee>0?`<p class="text-xs text-red-400 mt-0.5">최저比 +${formatW(diffFee)}</p>`:`<p class="text-xs text-emerald-600 mt-0.5 font-semibold">✓ 최저가</p>`}
             </div>
-            ${item.url
-                ? `<a href="${item.url}" target="_blank" class="btn-blue shrink-0" style="text-decoration:none"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>예약하기</a>`
-                : `<button onclick="openModal('${(item.course||'').replace(/'/g,"\\'")}','${item.time||''}','${item.source||item.platform||''}','${platCls}','${item.joinLabel||''}','${item.totalCost||0}')" class="btn-blue shrink-0"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>AI 자동예약</button>`
+            ${item.platUrl
+                ?`<a href="${item.platUrl}" target="_blank" rel="noopener" class="btn-app shrink-0" style="text-decoration:none">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    앱으로 이동
+                  </a>`
+                :`<button onclick="openModal('${(item.course||'').replace(/'/g,"\\'")}','${item.time||''}','${item.source||''}','${item.sourceCls||'b-golfmon'}','${item.joinLabel||''}','${item.greenFee||0}','${item.cartPer||0}','${item.caddiePer||0}','${(item.toll||0)+(item.gas||0)}','${item.totalCost||0}','${item.platUrl||''}')" class="btn-app shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    앱으로 이동
+                  </button>`
             }
         </div>
     </div>
@@ -855,84 +813,61 @@ function renderResults(data) {
     });
 }
 
-// ─────────────────────────────────────────────────────
-// 모달
-// ─────────────────────────────────────────────────────
-function openModal(course,time,src,cls,join,fee) {
-    const date = document.getElementById('searchDate').value || document.getElementById('manualDate').value;
-    document.getElementById('mCourse').innerText  = course;
-    document.getElementById('mDetail').innerText  = `${date} ${time} 티오프 · ${join}`;
-    document.getElementById('mFee').innerText     = formatW(parseInt(fee));
-    document.getElementById('mSuccess').classList.add('hidden');
-    document.getElementById('mSteps').classList.remove('hidden');
-    document.getElementById('mCloseBtn').innerText = '취소';
-    ['1','2','3'].forEach(n => {
-        document.getElementById(`ms${n}`).querySelector('div').style.cssText='color:#3a5070;border-color:#3a5070';
-        document.getElementById(`mi${n}`).innerHTML='';
-    });
+// ─────────────────────────────────────────
+// SafeLink 모달
+// ─────────────────────────────────────────
+let _deepLinkUrl='';
+function openModal(course,time,src,cls,join,gFee,cart,caddie,traffic,total,platUrl){
+    const date=document.getElementById('searchDate').value||document.getElementById('manualDate').value;
+    _deepLinkUrl=platUrl||PLAT.find(p=>p.name===src)?.url(course)||'';
+    document.getElementById('mCourse').innerText=course;
+    document.getElementById('mDetail').innerText=`${date} ${time} 티오프 · ${join}`;
+    document.getElementById('mSource').innerText=src;
+    document.getElementById('mGreenFee').innerText=formatW(parseInt(gFee));
+    document.getElementById('mService').innerText=formatW(parseInt(cart)+parseInt(caddie));
+    document.getElementById('mTraffic').innerText=formatW(parseInt(traffic));
+    document.getElementById('mTotal').innerText=formatW(parseInt(total));
+    document.getElementById('mLinkStatus').classList.add('hidden');
+    document.getElementById('mDeepBtn').classList.remove('hidden');
     document.getElementById('modal').classList.remove('hidden');
     document.getElementById('modal').classList.add('flex');
-    [400,1100,1900].forEach((d,i) => setTimeout(()=>{
-        document.getElementById(`ms${i+1}`).querySelector('div').style.cssText='color:var(--gold);border-color:var(--gold)';
-    },d));
-    [800,1500,2300].forEach((d,i) => setTimeout(()=>{
-        document.getElementById(`ms${i+1}`).querySelector('div').style.cssText='color:#4ade80;border-color:#4ade80';
-        document.getElementById(`mi${i+1}`).innerHTML='<svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>';
-    },d));
-    setTimeout(()=>{
-        document.getElementById('mSteps').classList.add('hidden');
-        document.getElementById('mSuccess').classList.remove('hidden');
-        document.getElementById('mCloseBtn').innerText='닫기';
-    },2800);
 }
-function closeModal() {
+function executeDeepLink(){
+    document.getElementById('mDeepBtn').classList.add('hidden');
+    document.getElementById('mLinkStatus').classList.remove('hidden');
+    document.getElementById('mLinkStatus').classList.add('flex');
+    setTimeout(()=>{
+        if(_deepLinkUrl) window.open(_deepLinkUrl,'_blank');
+        closeModal();
+    },1200);
+}
+function closeModal(){
     document.getElementById('modal').classList.add('hidden');
     document.getElementById('modal').classList.remove('flex');
 }
 
-// ─────────────────────────────────────────────────────
-// 정렬 탭
-// ─────────────────────────────────────────────────────
-document.addEventListener('click', e => {
-    const btn = e.target.closest('[data-sort]');
-    if (!btn) return;
-    document.querySelectorAll('[data-sort]').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on');
-    activeSort = btn.dataset.sort;
-    renderResults(sortData([...allResults]));
-});
-
-// ─────────────────────────────────────────────────────
-// 유틸
-// ─────────────────────────────────────────────────────
-function formatW(n) {
-    if (!n) return '—';
-    if (n >= 10000) {
-        const m = Math.floor(n/10000), r = n%10000;
-        return r ? `${m}만 ${r.toLocaleString()}원` : `${m}만원`;
-    }
-    return n.toLocaleString()+'원';
-}
-
-// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // INIT
-// ─────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    // 다음 토요일 날짜 설정
-    const today = new Date();
-    const diff  = (6 - today.getDay() + 7) % 7 || 7;
-    const sat   = new Date(today); sat.setDate(today.getDate()+diff);
-    document.getElementById('searchDate').valueAsDate = sat;
-    document.getElementById('manualDate').valueAsDate = sat;
-
+// ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+    const today=new Date();
+    const diff=(6-today.getDay()+7)%7||7;
+    const sat=new Date(today); sat.setDate(today.getDate()+diff);
+    document.getElementById('searchDate').valueAsDate=sat;
+    document.getElementById('manualDate').valueAsDate=sat;
     renderPlatformLinks();
     checkServer();
-    setInterval(checkServer, 5000);
-
-    window.addEventListener('scroll', () => {
-        document.getElementById('scrollTop').style.display = window.scrollY>400?'flex':'none';
+    setInterval(checkServer,5000);
+    window.addEventListener('scroll',()=>{
+        document.getElementById('scrollTop').style.display=window.scrollY>400?'flex':'none';
     });
 });
+
+function formatW(n){
+    if(!n||isNaN(n))return'—';
+    if(n>=10000){const m=Math.floor(n/10000),r=n%10000;return r?`${m}만 ${r.toLocaleString()}원`:`${m}만원`;}
+    return n.toLocaleString()+'원';
+}
 </script>
 </body>
 </html>
