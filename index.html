@@ -498,8 +498,39 @@ function renderPlatformLinks() {
 
 function openAll() {
     const course = document.getElementById('manualCourse').value.trim();
+    const date   = document.getElementById('manualDate').value;
     if (!course) { alert('골프장명을 입력해주세요.'); return; }
-    PLAT.forEach((p, i) => setTimeout(() => window.open(p.url(course), '_blank'), i * 250));
+
+    // 링크 모달 생성 — 팝업 차단 완전 우회
+    const existing = document.getElementById('openAllModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'openAllModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+    modal.innerHTML = `
+      <div style="background:#192231;border:1px solid #2a3a4a;border-radius:20px;padding:24px;width:100%;max-width:480px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <p style="font-size:15px;font-weight:800;color:#fff">⛳ ${course} — 플랫폼 선택</p>
+          <button onclick="document.getElementById('openAllModal').remove()"
+            style="background:rgba(255,255,255,.08);border:1px solid #2a3a4a;color:#9ca3af;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:13px">닫기</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          ${PLAT.map(p => `
+            <a href="${p.url(course)}" target="_blank" rel="noopener"
+              onclick="document.getElementById('openAllModal').remove()"
+              style="display:flex;align-items:center;gap:10px;background:#0f1923;border:1px solid #2a3a4a;border-radius:12px;padding:14px;text-decoration:none;transition:.15s"
+              onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#2a3a4a'">
+              <span class="${p.cls}" style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px">${p.name}</span>
+              <svg style="width:14px;height:14px;color:#4a6070;flex-shrink:0;margin-left:auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>`).join('')}
+        </div>
+        <p style="font-size:11px;color:#4a6070;text-align:center;margin-top:14px">각 플랫폼에서 로그인 후 "${course}" 검색 → 6/13 잔여 티타임 확인</p>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
 // ─────────────────────────────────────────────────────
