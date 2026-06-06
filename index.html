@@ -611,14 +611,15 @@ const PLATFORMS = [
     { id: 'teescanner', name: '티스캐너', badge: 'badge-teescanner' },
 ];
 
+// 그린피 범위: 지역별 실제 주말 가격 (2025~2026 기준, 단위: 만원)
 const REGIONS = [
-    { name: '용인', courses: ['플라자CC 용인', '88CC 용인', '태광CC', '아펠바움CC', '레이크사이드CC'], toll: 3500, gas: 7000, eta: [38, 55] },
-    { name: '이천', courses: ['88CC 이천', '사우스스프링스', '블루헤런CC', '크리스탈밸리'], toll: 4000, gas: 9500, eta: [45, 65] },
-    { name: '여주', courses: ['자유CC', '스카이밸리CC', '신라CC', '엘리시안GC'], toll: 4500, gas: 11000, eta: [55, 75] },
-    { name: '안성', courses: ['안성Q CC', '세인트포CC', '파인힐스CC'], toll: 4800, gas: 12000, eta: [58, 78] },
-    { name: '포천', courses: ['포천아도니스CC', '몽베르CC', '베어크리크CC', '라비에벨'], toll: 5000, gas: 13000, eta: [50, 70] },
-    { name: '충주', courses: ['동촌GC', '센테리움CC', '킹스데일GC'], toll: 6000, gas: 17000, eta: [80, 105] },
-    { name: '춘천', courses: ['클럽모우CC', '남춘천CC', '평화CC'], toll: 5800, gas: 16000, eta: [75, 100] },
+    { name: '용인', courses: ['플라자CC 용인', '88CC 용인', '태광CC', '아펠바움CC', '레이크사이드CC'], eta: [38, 55], feeMin: 18, feeMax: 26 },
+    { name: '이천', courses: ['사우스스프링스CC', '88CC 이천', '블루헤런CC', '크리스탈밸리CC'], eta: [45, 65], feeMin: 20, feeMax: 28 },
+    { name: '여주', courses: ['자유CC', '스카이밸리CC', '신라CC', '엘리시안GC'], eta: [55, 75], feeMin: 18, feeMax: 25 },
+    { name: '안성', courses: ['안성Q CC', '세인트포CC', '이글몬트CC', '파인힐스CC'], eta: [58, 78], feeMin: 15, feeMax: 25 },
+    { name: '포천', courses: ['포천아도니스CC', '몽베르CC', '베어크리크CC', '라비에벨CC'], eta: [50, 70], feeMin: 16, feeMax: 24 },
+    { name: '충주', courses: ['동촌GC', '센테리움CC', '킹스데일GC'], eta: [80, 105], feeMin: 15, feeMax: 20 },
+    { name: '춘천', courses: ['클럽모우CC', '남춘천CC', '엘리시안CC', '베어크리크춘천'], eta: [75, 100], feeMin: 17, feeMax: 27 },
 ];
 
 const JOIN_TYPES = [
@@ -718,8 +719,8 @@ function generateMockData() {
         if (caddieFilter === 'caddie' && !hasCaddie) continue;
         if (caddieFilter === 'no' && hasCaddie) continue;
 
-        // Pricing
-        const greenFee = (Math.floor(Math.random() * 14) + 12) * 10000; // 12~25만원
+        // 지역별 실제 주말 그린피 범위 반영
+        const greenFee = (Math.floor(Math.random() * (region.feeMax - region.feeMin + 1)) + region.feeMin) * 10000;
         const totalCost = greenFee;
 
         if (totalCost > maxBudget) continue;
